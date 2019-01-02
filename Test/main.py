@@ -12,7 +12,9 @@ import pickle
 import nsml
 import numpy as np
 
+# NSML 클라우드로부터 ir_ph1데이터셋 주소를 불러옴
 from nsml import DATASET_PATH
+
 import keras
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Flatten, Activation
@@ -91,6 +93,8 @@ def bind_model(model):
 
         return list(zip(range(len(retrieval_results)), retrieval_results.items()))
 
+    # nsml.bind : NSML에서 내부적으로 사용하는 함수 또는 변수들을 하나로 묶어주는 함수
+    # (https://n-clair.github.io/vision-docs/_build/html/ko_KR/contents/nsml_library/nsml_bind.html 참고)
     # DONOTCHANGE: They are reserved for nsml
     nsml.bind(save=save, load=load, infer=infer)
 
@@ -109,9 +113,10 @@ def preprocess(queries, db):
     img_size = (224, 224)
 
     for img_path in queries:
-        img = cv2.imread(img_path, 1)
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        img = cv2.resize(img, img_size)
+        img = cv2.imread(img_path,
+                         1)  # 이미지 파일을 알파 없는 BGR로 읽어옴 (https://opencv-python.readthedocs.io/en/latest/doc/01.imageStart/imageStart.html)
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)  # BGR->RGB로 채널순서변경
+        img = cv2.resize(img, img_size)  # 224*224 이미지해상도변경
         query_img.append(img)
 
     for img_path in db:
@@ -132,7 +137,8 @@ if __name__ == '__main__':
 
     # DONOTCHANGE: They are reserved for nsml
     args.add_argument('--mode', type=str, default='train', help='submit일때 해당값이 test로 설정됩니다.')
-    args.add_argument('--iteration', type=str, default='0', help='fork 명령어를 입력할때의 체크포인트로 설정됩니다. 체크포인트 옵션을 안주면 마지막 wall time 의 model 을 가져옵니다.')
+    args.add_argument('--iteration', type=str, default='0',
+                      help='fork 명령어를 입력할때의 체크포인트로 설정됩니다. 체크포인트 옵션을 안주면 마지막 wall time 의 model 을 가져옵니다.')
     args.add_argument('--pause', type=int, default=0, help='model 을 load 할때 1로 설정됩니다.')
     config = args.parse_args()
 
@@ -185,6 +191,7 @@ if __name__ == '__main__':
         print('dataset path', DATASET_PATH)
         output_path = ['./img_list.pkl', './label_list.pkl']
         train_dataset_path = DATASET_PATH + '/train/train_data'
+        # train_dataset_path = DATASET_PATH + '/train/train_data'  # Local에서 테스트할경우 사용하는 코드
 
         if nsml.IS_ON_NSML:
             # Caching file
