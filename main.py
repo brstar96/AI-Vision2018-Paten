@@ -19,7 +19,7 @@ from keras.layers import Dense, Dropout, Flatten, Activation
 from keras.layers import Conv2D, MaxPooling2D
 from keras.callbacks import ReduceLROnPlateau
 from keras import backend as K
-from data_loader import train_data_loader
+# from data_loader import train_data_loader
 
 
 def bind_model(model):
@@ -49,15 +49,15 @@ def bind_model(model):
         reference_img = np.asarray(reference_img)
 
         query_img = query_img.astype('float32')
-        query_img /= 255
+        query_img /= 255 #범위 축소
         reference_img = reference_img.astype('float32')
         reference_img /= 255
 
-        get_feature_layer = K.function([model.layers[0].input] + [K.learning_phase()], [model.layers[-2].output])
+        get_feature_layer = K.function([model.layers[0].input] + [K.learning_phase()], [model.layers[-2].output])  #model의 특정 레이어를 불러옴
 
         print('inference start')
-
         # inference
+        #query image를 모델의 특정 레이어에 넣은 후 feature vectors를 반환
         query_vecs = get_feature_layer([query_img, 0])[0]
 
         # caching db output, db inference
@@ -71,19 +71,20 @@ def bind_model(model):
                 pickle.dump(reference_vecs, f)
 
         # l2 normalization
-        query_vecs = l2_normalize(query_vecs)
-        reference_vecs = l2_normalize(reference_vecs)
+        query_vecs = l2_normalize(query_vecs) #feature vectors에 대해 normalize수행하여 간소화
+        reference_vecs = l2_normalize(reference_vecs) #reference image의 feature vectors도 normalize 수행
 
         # Calculate cosine similarity
-        sim_matrix = np.dot(query_vecs, reference_vecs.T)
+        sim_matrix = np.dot(query_vecs, reference_vecs.T) #query와 refer img의 feature vectors를 내적
 
         retrieval_results = {}
 
         for (i, query) in enumerate(queries):
             query = query.split('/')[-1].split('.')[0]
-            sim_list = zip(references, sim_matrix[i].tolist())
-            sorted_sim_list = sorted(sim_list, key=lambda x: x[1], reverse=True)
 
+            # tolist : i번째 sim_matrix numpy array를 list로 변환후 zip을 통해 reference array와 묶어 sim_list로 반환
+            sim_list = zip(references, sim_matrix[i].tolist())
+            sorted_sim_list = sorted(sim_list, key=lambda x: x[1], reverse=True) # 정렬된 sim_list를 반환
             ranked_list = [k.split('/')[-1].split('.')[0] for (k, v) in sorted_sim_list]  # ranked list
 
             retrieval_results[query] = ranked_list
@@ -168,7 +169,7 @@ if __name__ == '__main__':
 
     bind_model(model)
 
-    if config.pause:
+    # if config.pause:
         nsml.paused(scope=locals())
 
     bTrainmode = False
@@ -184,10 +185,10 @@ if __name__ == '__main__':
         """ Load data """
         print('dataset path', DATASET_PATH)
         output_path = ['./img_list.pkl', './label_list.pkl']
-        train_dataset_path = DATASET_PATH + '/train/train_data'
+        # train_dataset_path = DATASET_PATH + '/train/train_data'
 
         if nsml.IS_ON_NSML:
-            # Caching file
+            Caching file
             nsml.cache(train_data_loader, data_path=train_dataset_path, img_size=input_shape[:2],
                        output_path=output_path)
         else:
