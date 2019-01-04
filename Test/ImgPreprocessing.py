@@ -1,4 +1,4 @@
-import os
+import numpy as np
 import cv2
 import glob
 import itertools
@@ -11,9 +11,8 @@ import itertools
 '''
 
 #이미지 전처리
-def Preprocessing_data_loader(res, img_size):
+def Preprocessing_data_loader(res, img_size, output_path):
     img_list=[]
-    img_idx=[]
 
     for i in range(len(res)):
         FileName = str(res[i])
@@ -27,6 +26,18 @@ def Preprocessing_data_loader(res, img_size):
         print(im_height)
         print(im_width)
 
+        newImage = np.array(img_size) #224 * 224 새 이미지 생성
+        h = newImage.shape[0]
+        w = newImage.shape[1]
+        print(h)
+
+        for height in range(0,h):
+            for width in range(0,w):
+                newImage[height][width] = img_list[i][height][width]
+
+        cv2.imwrite(output_path + str(i) + ".jpg", newImage)
+    print("file has been created : ", str(newImage))
+
 #file names를 가져오기
 def getFileNames(exts):
     fnames = [glob.glob(ext) for ext in exts]
@@ -36,8 +47,9 @@ def getFileNames(exts):
 def main():
     # PreprocessTestImgs 폴더에서 .png, .jpg를 가져오기
     exts = ["PreprocessTestImgs\*.png", "PreprocessTestImgs\*.jpg"]
+    output_path = "./ChangedImgs"
     input_shape = (224, 224, 3)
     res = getFileNames(exts)
-    Preprocessing_data_loader(res, input_shape[:2])
+    Preprocessing_data_loader(res, input_shape[:2], output_path)
 
 main()
