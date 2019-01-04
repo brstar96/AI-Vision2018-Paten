@@ -129,7 +129,7 @@ if __name__ == '__main__':
     args = argparse.ArgumentParser()
 
     # hyperparameters
-    args.add_argument('--epochs', type=int, default=1000)
+    args.add_argument('--epochs', type=int, default=1)
     args.add_argument('--batch_size', type=int, default=128)
 
     # DONOTCHANGE: They are reserved for nsml
@@ -156,7 +156,7 @@ if __name__ == '__main__':
     bTrainmode = False
     if config.mode == 'train':
 
-        # nsml.load(checkpoint='test0', session='team_33/ir_ph1_v2/23')           # load시 수정 필수!
+        nsml.load(checkpoint='default_densenet_model_1_990', session='team_33/ir_ph1_v2/25')           # load시 수정 필수!
 
         bTrainmode = True
 
