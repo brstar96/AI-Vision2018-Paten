@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import cv2
 import glob
@@ -21,29 +22,35 @@ def Preprocessing_data_loader(ImgNameList, img_size, output_path):
 
         newImage = np.array(templist) #224 * 224 *3 새 이미지 생성
         NewImgHeight, NewImgWidth,_ = newImage.shape
-        print("New Image Shape :", newImage.shape)
+        # print("New Image Shape :", newImage.shape)
 
         for height in range(0,NewImgHeight):
             for width in range(0,NewImgWidth):
                 newImage[height][width] = Img[height][width]
 
         cv2.imwrite(output_path+ "/" + str(ImgNo) + ".jpg", newImage)
-        print("file has been created : ", str(ImgNo) + ".jpg")
+        # print("file has been created : ", str(ImgNo) + ".jpg")
 
 #file names를 가져오기
 def getFileNames(exts):
     fnames = [glob.glob(ext) for ext in exts]
     fnames = list(itertools.chain.from_iterable(fnames))
-    print(fnames)
+    # print(fnames)
     return fnames
 
 if __name__ == '__main__':
     # PreprocessTestImgs 폴더에서 .png, .jpg를 가져오기
-    exts = ["PreprocessTestImgs\*.png", "PreprocessTestImgs\*.jpg"]
-    output_path = "./ChangedImgs"
+    output_path = "./Changed_Data_example_ph1"
+    DatasetPath = "Data_example_ph1"
+    print(os.listdir(DatasetPath))
+    exts = [DatasetPath + "/" + os.listdir(DatasetPath)[0] + "/" + "*.jpg"]
+    print(exts)
+
+
     input_shape = (224, 224, 3)
     ImgNameList = getFileNames(exts)
     print(ImgNameList)
+
     Preprocessing_data_loader(ImgNameList, input_shape[:2], output_path)
 
 
