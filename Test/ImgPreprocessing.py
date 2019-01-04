@@ -11,45 +11,39 @@ import itertools
 '''
 
 #이미지 전처리
-def Preprocessing_data_loader(res, img_size, output_path):
-    img_list=[]
+def Preprocessing_data_loader(ImgNameList, img_size, output_path):
+    for ImgNo in range(0, len(ImgNameList)):
+        FileName = str(ImgNameList[ImgNo])
+        Img = cv2.imread(FileName)
+        Img = cv2.resize(Img, img_size)  # 224*224 resize
+        ImgHeight, ImgWidth, _ = Img.shape
+        templist = [[[0 for col in range(3)] for row in range(img_size[0])] for rgb in range(img_size[0])]
 
-    for i in range(len(res)):
-        FileName = str(res[i])
-        print(FileName)
-        img_list.append(cv2.imread(FileName))
-        img_list[i] = cv2.cvtColor(img_list[i], cv2.COLOR_BGR2RGB) #change channel input
-        img_list[i] = cv2.resize(img_list[i], img_size) #224*224 resize
+        newImage = np.array(templist) #224 * 224 *3 새 이미지 생성
+        NewImgHeight, NewImgWidth,_ = newImage.shape
+        print("New Image Shape :", newImage.shape)
 
-        im_height = img_list[i].shape[0]
-        im_width = img_list[i].shape[1]
-        print(im_height)
-        print(im_width)
+        for height in range(0,NewImgHeight):
+            for width in range(0,NewImgWidth):
+                newImage[height][width] = Img[height][width]
 
-        newImage = np.array(img_size) #224 * 224 새 이미지 생성
-        h = newImage.shape[0]
-        w = newImage.shape[1]
-        print(h)
-
-        for height in range(0,h):
-            for width in range(0,w):
-                newImage[height][width] = img_list[i][height][width]
-
-        cv2.imwrite(output_path + str(i) + ".jpg", newImage)
-    print("file has been created : ", str(newImage))
+        cv2.imwrite(output_path+ "/" + str(ImgNo) + ".jpg", newImage)
+        print("file has been created : ", str(ImgNo) + ".jpg")
 
 #file names를 가져오기
 def getFileNames(exts):
     fnames = [glob.glob(ext) for ext in exts]
     fnames = list(itertools.chain.from_iterable(fnames))
+    print(fnames)
     return fnames
 
-def main():
+if __name__ == '__main__':
     # PreprocessTestImgs 폴더에서 .png, .jpg를 가져오기
     exts = ["PreprocessTestImgs\*.png", "PreprocessTestImgs\*.jpg"]
     output_path = "./ChangedImgs"
     input_shape = (224, 224, 3)
-    res = getFileNames(exts)
-    Preprocessing_data_loader(res, input_shape[:2], output_path)
+    ImgNameList = getFileNames(exts)
+    print(ImgNameList)
+    Preprocessing_data_loader(ImgNameList, input_shape[:2], output_path)
 
-main()
+
