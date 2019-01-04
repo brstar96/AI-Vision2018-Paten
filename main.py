@@ -128,7 +128,7 @@ if __name__ == '__main__':
     args = argparse.ArgumentParser()
 
     # hyperparameters
-    args.add_argument('--epochs', type=int, default=5)
+    args.add_argument('--epochs', type=int, default=200)
     args.add_argument('--batch_size', type=int, default=128)
 
     # DONOTCHANGE: They are reserved for nsml
