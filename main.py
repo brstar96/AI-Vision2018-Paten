@@ -30,6 +30,7 @@ def bind_model(model):
         print('model saved!')
 
     def load(file_path):
+        print('model load start!')
         model.load_weights(file_path)
         print('model loaded!')
 
@@ -128,7 +129,7 @@ if __name__ == '__main__':
     args = argparse.ArgumentParser()
 
     # hyperparameters
-    args.add_argument('--epochs', type=int, default=200)
+    args.add_argument('--epochs', type=int, default=1000)
     args.add_argument('--batch_size', type=int, default=128)
 
     # DONOTCHANGE: They are reserved for nsml
@@ -154,6 +155,9 @@ if __name__ == '__main__':
 
     bTrainmode = False
     if config.mode == 'train':
+
+        # nsml.load(checkpoint='test0', session='team_33/ir_ph1_v2/23')           # load시 수정 필수!
+
         bTrainmode = True
 
         """ Initiate RMSprop optimizer """
@@ -205,4 +209,7 @@ if __name__ == '__main__':
             print(res.history)
             train_loss, train_acc = res.history['loss'][0], res.history['acc'][0]
             nsml.report(summary=True, epoch=epoch, epoch_total=nb_epoch, loss=train_loss, acc=train_acc)
-            nsml.save(epoch)
+            if epoch % 10 == 0:
+                check = "default_densenet_model_1_"+str(epoch)
+                print('checkpoint name : '+ check)
+                nsml.save(checkpoint=check)
