@@ -210,6 +210,6 @@ if __name__ == '__main__':
             train_loss, train_acc = res.history['loss'][0], res.history['acc'][0]
             nsml.report(summary=True, epoch=epoch, epoch_total=nb_epoch, loss=train_loss, acc=train_acc)
             if epoch % 10 == 0:
-                check = "default_densenet_model_1_"+str(epoch)
+                check = "default_DN_model_1_"+str(epoch)
                 print('checkpoint name : '+ check)
                 nsml.save(checkpoint=check)
