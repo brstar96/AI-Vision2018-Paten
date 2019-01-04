@@ -21,6 +21,7 @@ from keras.callbacks import ReduceLROnPlateau
 from keras import backend as K
 from data_loader import train_data_loader
 
+import densenet
 
 def bind_model(model):
     def save(dir_name):
@@ -136,35 +137,15 @@ if __name__ == '__main__':
     args.add_argument('--pause', type=int, default=0, help='model 을 load 할때 1로 설정됩니다.')
     config = args.parse_args()
 
-    # training parameters
+    # training parameters 
     nb_epoch = config.epochs
     batch_size = config.batch_size
     num_classes = 1000
     input_shape = (224, 224, 3)  # input image shape
 
-    """ Model """
-    model = Sequential()
-    model.add(Conv2D(32, (3, 3), padding='same', input_shape=input_shape))
-    model.add(Activation('relu'))
-    model.add(Conv2D(32, (3, 3)))
-    model.add(Activation('relu'))
-    model.add(MaxPooling2D(pool_size=(2, 2)))
-    model.add(Dropout(0.25))
 
-    model.add(Conv2D(64, (3, 3), padding='same'))
-    model.add(Activation('relu'))
-    model.add(Conv2D(64, (3, 3)))
-    model.add(Activation('relu'))
-    model.add(MaxPooling2D(pool_size=(2, 2)))
-    model.add(Dropout(0.25))
-
-    model.add(Flatten())
-    model.add(Dense(512))
-    model.add(Activation('relu'))
-    model.add(Dropout(0.5))
-    model.add(Dense(num_classes))
-    model.add(Activation('softmax'))
-    model.summary()
+    """ Densenet Model """
+    model = densenet.DenseNet()
 
     bind_model(model)
 
@@ -176,7 +157,9 @@ if __name__ == '__main__':
         bTrainmode = True
 
         """ Initiate RMSprop optimizer """
-        opt = keras.optimizers.rmsprop(lr=0.00045, decay=1e-6)
+        # opt = keras.optimizers.rmsprop(lr=0.00045, decay=1e-6)
+        opt = keras.optimizers.Adam(lr = 1e-4)
+
         model.compile(loss='categorical_crossentropy',
                       optimizer=opt,
                       metrics=['accuracy'])
