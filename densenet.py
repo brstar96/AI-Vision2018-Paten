@@ -1,11 +1,11 @@
 from keras.models import Model
-from keras.layers import Input, merge, ZeroPadding2D
+from keras.layers import Input, ZeroPadding2D
 from keras.layers.core import Dense, Dropout, Activation
 from keras.layers.convolutional import Convolution2D
 from keras.layers.pooling import AveragePooling2D, GlobalAveragePooling2D, MaxPooling2D
 from keras.layers.normalization import BatchNormalization
 import keras.backend as K
-
+from keras.layers.merge import concatenate
 def DenseNet(nb_dense_block=4, growth_rate=32, nb_filter=64, reduction=0.0, dropout_rate=0.0, weight_decay=1e-4,classes=1000, weights_path=None):
     eps = 1.1e-5
 
@@ -94,7 +94,8 @@ def dense_block(x, nb_layers, nb_filter, growth_rate, dropout_rate=None, weight_
     for i in range(nb_layers):
         branch = i+1
         x = conv_block(concat_feat, branch, growth_rate, dropout_rate, weight_decay)
-        concat_feat = merge([concat_feat, x], mode='concat', concat_axis=concat_axis)
+        #concat_feat = merge([concat_feat, x], mode='concat', concat_axis=concat_axis)
+        concatenate([concat_feat, x],axis=concat_axis)
 
         if grow_nb_filters:
             nb_filter += growth_rate

@@ -137,7 +137,7 @@ if __name__ == '__main__':
     args.add_argument('--pause', type=int, default=0, help='model 을 load 할때 1로 설정됩니다.')
     config = args.parse_args()
 
-    # training parameters 
+    # training parameters
     nb_epoch = config.epochs
     batch_size = config.batch_size
     num_classes = 1000
