@@ -6,7 +6,7 @@ from keras.layers.pooling import AveragePooling2D, GlobalAveragePooling2D, MaxPo
 from keras.layers.normalization import BatchNormalization
 import keras.backend as K
 from keras.layers.merge import concatenate
-def DenseNet(nb_dense_block=4, growth_rate=32, nb_filter=64, reduction=0.0, dropout_rate=0.0, weight_decay=1e-4,classes=1000, weights_path=None):
+def DenseNet(nb_dense_block=4, growth_rate=32, nb_filter=64, reduction=0.0, dropout_rate=0.2, weight_decay=1e-4,classes=1000, weights_path=None):
     eps = 1.1e-5
 
     # 압축 정도
