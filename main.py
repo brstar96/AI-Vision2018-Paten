@@ -237,5 +237,5 @@ if __name__ == '__main__':
             nsml.report(summary=True, epoch=epoch, epoch_total=nb_epoch, loss=train_loss, acc=train_acc)
             if epoch % 1 == 0:
                 check = 'MGL_0106_test3_'
-                print('checkpoint name : '+ check)
+                print('checkpoint name : ' + check)
                 nsml.save(checkpoint=check)
