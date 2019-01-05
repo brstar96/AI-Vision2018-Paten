@@ -50,13 +50,26 @@ def bind_model(model):
         references = np.asarray(references)
         reference_img = np.asarray(reference_img)
 
+        print('queries')
+        print(queries)
+        print('references')
+        print(references)
+
         query_img = query_img.astype('float32')
         query_img /= 255
+
+        # 색 반전
+        query_img = 1-query_img
+
         reference_img = reference_img.astype('float32')
         reference_img /= 255
 
+        # 색 반전
+        reference_img = 1-reference_img
+
         # 확률 형태로 vector 뽑아냄
         get_feature_layer = K.function([model.layers[0].input] + [K.learning_phase()], [model.layers[-1].output])
+
         # get_feature_layer = K.function([model.layers[0].input] + [K.learning_phase()], [model.layers[-2].output])
 
         print('inference start')
@@ -164,7 +177,7 @@ if __name__ == '__main__':
     bTrainmode = False
     if config.mode == 'train':
 
-        # nsml.load(checkpoint='submit2', session='team_33/ir_ph1_v2/38')           # load시 수정 필수!
+        # nsml.load(checkpoint='MGL_0106_test3_', session='team_33/ir_ph1_v2/38')           # load시 수정 필수!
 
         bTrainmode = True
 
@@ -223,7 +236,6 @@ if __name__ == '__main__':
             train_loss, train_acc = res.history['loss'][0], res.history['acc'][0]
             nsml.report(summary=True, epoch=epoch, epoch_total=nb_epoch, loss=train_loss, acc=train_acc)
             if epoch % 1 == 0:
-                check = "DN_MGL_model_1_"+str(epoch)
-                # check = 'MGL_submit1'
+                check = 'MGL_0106_test3_'
                 print('checkpoint name : '+ check)
                 nsml.save(checkpoint=check)
