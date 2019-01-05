@@ -19,8 +19,9 @@ from keras.layers import Dense, Dropout, Flatten, Activation
 from keras.layers import Conv2D, MaxPooling2D
 from keras.callbacks import ReduceLROnPlateau
 from keras import backend as K
-# from data_loader import train_data_loader
+from data_loader import train_data_loader
 
+import densenet
 
 def bind_model(model):
     def save(dir_name):
@@ -29,6 +30,7 @@ def bind_model(model):
         print('model saved!')
 
     def load(file_path):
+        print('model load start!')
         model.load_weights(file_path)
         print('model loaded!')
 
@@ -49,15 +51,17 @@ def bind_model(model):
         reference_img = np.asarray(reference_img)
 
         query_img = query_img.astype('float32')
-        query_img /= 255 #범위 축소
+        query_img /= 255
         reference_img = reference_img.astype('float32')
         reference_img /= 255
 
-        get_feature_layer = K.function([model.layers[0].input] + [K.learning_phase()], [model.layers[-2].output])  #model의 특정 레이어를 불러옴
+        # 확률 형태로 vector 뽑아냄
+        get_feature_layer = K.function([model.layers[0].input] + [K.learning_phase()], [model.layers[-1].output])
+        # get_feature_layer = K.function([model.layers[0].input] + [K.learning_phase()], [model.layers[-2].output])
 
         print('inference start')
+
         # inference
-        #query image를 모델의 특정 레이어에 넣은 후 feature vectors를 반환
         query_vecs = get_feature_layer([query_img, 0])[0]
 
         # caching db output, db inference
@@ -71,24 +75,28 @@ def bind_model(model):
                 pickle.dump(reference_vecs, f)
 
         # l2 normalization
-        query_vecs = l2_normalize(query_vecs) #feature vectors에 대해 normalize수행하여 간소화
-        reference_vecs = l2_normalize(reference_vecs) #reference image의 feature vectors도 normalize 수행
+        # query_vecs = l2_normalize(query_vecs)
+        # reference_vecs = l2_normalize(reference_vecs)
 
         # Calculate cosine similarity
-        sim_matrix = np.dot(query_vecs, reference_vecs.T) #query와 refer img의 feature vectors를 내적
+        sim_matrix = np.dot(query_vecs, reference_vecs.T)
 
         retrieval_results = {}
 
         for (i, query) in enumerate(queries):
+            print('query')
+            print(query)
             query = query.split('/')[-1].split('.')[0]
-
-            # tolist : i번째 sim_matrix numpy array를 list로 변환후 zip을 통해 reference array와 묶어 sim_list로 반환
+            print('after split query')
+            print(query)
             sim_list = zip(references, sim_matrix[i].tolist())
-            sorted_sim_list = sorted(sim_list, key=lambda x: x[1], reverse=True) # 정렬된 sim_list를 반환
+            sorted_sim_list = sorted(sim_list, key=lambda x: x[1], reverse=True)
+
             ranked_list = [k.split('/')[-1].split('.')[0] for (k, v) in sorted_sim_list]  # ranked list
 
             retrieval_results[query] = ranked_list
         print('done')
+        print(list(zip(range(len(retrieval_results)), retrieval_results.items())))
 
         return list(zip(range(len(retrieval_results)), retrieval_results.items()))
 
@@ -128,8 +136,8 @@ if __name__ == '__main__':
     args = argparse.ArgumentParser()
 
     # hyperparameters
-    args.add_argument('--epochs', type=int, default=5)
-    args.add_argument('--batch_size', type=int, default=128)
+    args.add_argument('--epochs', type=int, default=300)
+    args.add_argument('--batch_size', type=int, default=32)
 
     # DONOTCHANGE: They are reserved for nsml
     args.add_argument('--mode', type=str, default='train', help='submit일때 해당값이 test로 설정됩니다.')
@@ -143,41 +151,27 @@ if __name__ == '__main__':
     num_classes = 1000
     input_shape = (224, 224, 3)  # input image shape
 
-    """ Model """
-    model = Sequential()
-    model.add(Conv2D(32, (3, 3), padding='same', input_shape=input_shape))
-    model.add(Activation('relu'))
-    model.add(Conv2D(32, (3, 3)))
-    model.add(Activation('relu'))
-    model.add(MaxPooling2D(pool_size=(2, 2)))
-    model.add(Dropout(0.25))
 
-    model.add(Conv2D(64, (3, 3), padding='same'))
-    model.add(Activation('relu'))
-    model.add(Conv2D(64, (3, 3)))
-    model.add(Activation('relu'))
-    model.add(MaxPooling2D(pool_size=(2, 2)))
-    model.add(Dropout(0.25))
-
-    model.add(Flatten())
-    model.add(Dense(512))
-    model.add(Activation('relu'))
-    model.add(Dropout(0.5))
-    model.add(Dense(num_classes))
-    model.add(Activation('softmax'))
+    """ Densenet Model """
+    model = densenet.DenseNet()
     model.summary()
 
     bind_model(model)
 
-    # if config.pause:
+    if config.pause:
         nsml.paused(scope=locals())
 
     bTrainmode = False
     if config.mode == 'train':
+
+        # nsml.load(checkpoint='submit2', session='team_33/ir_ph1_v2/38')           # load시 수정 필수!
+
         bTrainmode = True
 
         """ Initiate RMSprop optimizer """
-        opt = keras.optimizers.rmsprop(lr=0.00045, decay=1e-6)
+        # opt = keras.optimizers.rmsprop(lr=0.00045, decay=1e-6)
+        opt = keras.optimizers.Adam(lr = 1e-4)
+
         model.compile(loss='categorical_crossentropy',
                       optimizer=opt,
                       metrics=['accuracy'])
@@ -185,10 +179,10 @@ if __name__ == '__main__':
         """ Load data """
         print('dataset path', DATASET_PATH)
         output_path = ['./img_list.pkl', './label_list.pkl']
-        # train_dataset_path = DATASET_PATH + '/train/train_data'
+        train_dataset_path = DATASET_PATH + '/train/train_data'
 
         if nsml.IS_ON_NSML:
-            Caching file
+            # Caching file
             nsml.cache(train_data_loader, data_path=train_dataset_path, img_size=input_shape[:2],
                        output_path=output_path)
         else:
@@ -205,14 +199,19 @@ if __name__ == '__main__':
         y_train = keras.utils.to_categorical(labels, num_classes=num_classes)
         x_train = x_train.astype('float32')
         x_train /= 255
+
+        x_train = 1-x_train
         print(len(labels), 'train samples')
 
         """ Callback """
         monitor = 'acc'
         reduce_lr = ReduceLROnPlateau(monitor=monitor, patience=3)
 
+        learning_rate = 1e-4
         """ Training loop """
         for epoch in range(nb_epoch):
+            if epoch == (nb_epoch * 0.5) or epoch == (nb_epoch * 0.75):
+                learning_rate = learning_rate / 10
             res = model.fit(x_train, y_train,
                             batch_size=batch_size,
                             initial_epoch=epoch,
@@ -223,4 +222,8 @@ if __name__ == '__main__':
             print(res.history)
             train_loss, train_acc = res.history['loss'][0], res.history['acc'][0]
             nsml.report(summary=True, epoch=epoch, epoch_total=nb_epoch, loss=train_loss, acc=train_acc)
-            nsml.save(epoch)
+            if epoch % 1 == 0:
+                check = "DN_MGL_model_1_"+str(epoch)
+                # check = 'MGL_submit1'
+                print('checkpoint name : '+ check)
+                nsml.save(checkpoint=check)

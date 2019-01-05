@@ -58,7 +58,7 @@ def bind_model(model):
         reference_img = reference_img.astype('float32')
         reference_img /= 255
 
-        #model로부터 특정
+        #model로부터 특정 레이어를 불러옴
         get_feature_layer = K.function([model.layers[0].input] + [K.learning_phase()], [model.layers[-2].output])
 
         print('inference start')
