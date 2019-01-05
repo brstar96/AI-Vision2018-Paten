@@ -67,7 +67,10 @@ def bind_model(model):
         # 색 반전
         reference_img = 1-reference_img
 
-        get_feature_layer = K.function([model.layers[0].input] + [K.learning_phase()], [model.layers[-2].output])
+        # 확률 형태로 vector 뽑아냄
+        get_feature_layer = K.function([model.layers[0].input] + [K.learning_phase()], [model.layers[-1].output])
+
+        # get_feature_layer = K.function([model.layers[0].input] + [K.learning_phase()], [model.layers[-2].output])
 
         print('inference start')
 
@@ -146,7 +149,7 @@ if __name__ == '__main__':
     args = argparse.ArgumentParser()
 
     # hyperparameters
-    args.add_argument('--epochs', type=int, default=1000)
+    args.add_argument('--epochs', type=int, default=1)
     args.add_argument('--batch_size', type=int, default=32)
 
     # DONOTCHANGE: They are reserved for nsml
@@ -174,7 +177,7 @@ if __name__ == '__main__':
     bTrainmode = False
     if config.mode == 'train':
 
-        # nsml.load(checkpoint='submit1', session='team_33/ir_ph1_v2/28')           # load시 수정 필수!
+        nsml.load(checkpoint='submit2', session='team_33/ir_ph1_v2/38')           # load시 수정 필수!
 
         bTrainmode = True
 
@@ -232,8 +235,8 @@ if __name__ == '__main__':
             print(res.history)
             train_loss, train_acc = res.history['loss'][0], res.history['acc'][0]
             nsml.report(summary=True, epoch=epoch, epoch_total=nb_epoch, loss=train_loss, acc=train_acc)
-            if epoch % 10 == 0:
-                check = "DN_model_2_"+str(epoch)
-                # check = 'submit1'
+            if epoch % 1 == 0:
+                # check = "DN_model_2_"+str(epoch)
+                check = 'submit2'
                 print('checkpoint name : '+ check)
                 nsml.save(checkpoint=check)
