@@ -93,6 +93,7 @@ def bind_model(model):
 
         # Calculate cosine similarity
         sim_matrix = np.dot(query_vecs, reference_vecs.T)
+        print(sim_matrix)
 
         retrieval_results = {}
 
