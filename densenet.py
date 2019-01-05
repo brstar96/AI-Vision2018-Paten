@@ -16,10 +16,14 @@ def DenseNet(nb_dense_block=4, growth_rate=32, nb_filter=64, reduction=0.0, drop
     concat_axis = 3
     img_input = Input(shape=(224,224,3), name='data')
 
-    nb_filter = 64
+    # nb_filter = 64
+    nb_filter = 96
+    growth_rate = 48
+
 
     # densenet 버전에 따른 수정가능
-    nb_layers = [6,12,32,32]             # densenet 169
+    # nb_layers = [6,12,32,32]             # densenet 169
+    nb_layers = [6, 12, 36, 24]
 
     # 초기 convolution
     x = ZeroPadding2D((3,3))(img_input)

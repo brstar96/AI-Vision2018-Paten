@@ -93,6 +93,8 @@ def bind_model(model):
 
         # Calculate cosine similarity
         sim_matrix = np.dot(query_vecs, reference_vecs.T)
+        print('sim_matrix')
+        print(sim_matrix)
 
         retrieval_results = {}
 
@@ -149,8 +151,8 @@ if __name__ == '__main__':
     args = argparse.ArgumentParser()
 
     # hyperparameters
-    args.add_argument('--epochs', type=int, default=1)
-    args.add_argument('--batch_size', type=int, default=32)
+    args.add_argument('--epochs', type=int, default=1000)
+    args.add_argument('--batch_size', type=int, default=64)
 
     # DONOTCHANGE: They are reserved for nsml
     args.add_argument('--mode', type=str, default='train', help='submit일때 해당값이 test로 설정됩니다.')
@@ -177,7 +179,7 @@ if __name__ == '__main__':
     bTrainmode = False
     if config.mode == 'train':
 
-        nsml.load(checkpoint='submit2', session='team_33/ir_ph1_v2/38')           # load시 수정 필수!
+        # nsml.load(checkpoint='submit1', session='team_33/ir_ph1_v2/28')           # load시 수정 필수!
 
         bTrainmode = True
 
@@ -208,12 +210,18 @@ if __name__ == '__main__':
             label_list = pickle.load(label_f)
 
         x_train = np.asarray(img_list)
+        print('x_train.shape')
+        print(x_train.shape)
         labels = np.asarray(label_list)
+        print('label_list.shape')
+        print(labels.shape)
         y_train = keras.utils.to_categorical(labels, num_classes=num_classes)
         x_train = x_train.astype('float32')
         x_train /= 255
 
+        # 색 반전
         x_train = 1-x_train
+
         print(len(labels), 'train samples')
 
         """ Callback """
@@ -222,7 +230,7 @@ if __name__ == '__main__':
 
         learning_rate = 1e-4
         """ Training loop """
-        for epoch in range(nb_epoch):
+        for epoch in range(nb_epoch+1):
             if epoch == (nb_epoch * 0.5) or epoch == (nb_epoch * 0.75):
                 learning_rate = learning_rate / 10
             res = model.fit(x_train, y_train,
@@ -235,8 +243,8 @@ if __name__ == '__main__':
             print(res.history)
             train_loss, train_acc = res.history['loss'][0], res.history['acc'][0]
             nsml.report(summary=True, epoch=epoch, epoch_total=nb_epoch, loss=train_loss, acc=train_acc)
-            if epoch % 1 == 0:
-                # check = "DN_model_2_"+str(epoch)
-                check = 'submit2'
+            if epoch % 10 == 0:
+                check = "DN_model_3_"+str(epoch)
+                # check = 'submit1_2'
                 print('checkpoint name : '+ check)
                 nsml.save(checkpoint=check)
