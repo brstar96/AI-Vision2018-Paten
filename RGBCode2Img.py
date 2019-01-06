@@ -18,10 +18,11 @@ def txt2list(txtPath):
         newtxtList[i] = newtxtList[i].split()
         print(newtxtList[i])
 
-    for i in range(imgChannel):
-        for ImgWidth in range(imgWidth):
-            for imgHeight in range(imgHeight):
+    for i in imgChannel:
+        for ImgWidth in imgWidth:
+            for imgHeight in imgHeight:
                 # NewImg np array에 newtxtList[2][1]처럼 픽셀값 대입하는부분 작성할것.
+                print(imgHeight)
 
     #테스트용 txt파일
     file = open("testfile.txt", "w")
