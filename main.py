@@ -20,7 +20,7 @@ from keras.layers import Conv2D, MaxPooling2D
 from keras.callbacks import ReduceLROnPlateau
 from keras import backend as K
 from data_loader import train_data_loader
-
+from keras.preprocessing.image import ImageDataGenerator
 import densenet
 
 def bind_model(model):
@@ -50,12 +50,27 @@ def bind_model(model):
         references = np.asarray(references)
         reference_img = np.asarray(reference_img)
 
+        print('queries')
+        print(queries)
+        print('references')
+        print(references)
+
         query_img = query_img.astype('float32')
         query_img /= 255
+
+        # 색 반전
+        query_img = query_img
+
         reference_img = reference_img.astype('float32')
         reference_img /= 255
 
-        get_feature_layer = K.function([model.layers[0].input] + [K.learning_phase()], [model.layers[-2].output])
+        # 색 반전
+        reference_img = reference_img
+
+        # 확률 형태로 vector 뽑아냄
+        get_feature_layer = K.function([model.layers[0].input] + [K.learning_phase()], [model.layers[-1].output])
+
+        # get_feature_layer = K.function([model.layers[0].input] + [K.learning_phase()], [model.layers[-2].output])
 
         print('inference start')
 
@@ -82,7 +97,11 @@ def bind_model(model):
         retrieval_results = {}
 
         for (i, query) in enumerate(queries):
+            print('query')
+            print(query)
             query = query.split('/')[-1].split('.')[0]
+            print('after split query')
+            print(query)
             sim_list = zip(references, sim_matrix[i].tolist())
             sorted_sim_list = sorted(sim_list, key=lambda x: x[1], reverse=True)
 
@@ -90,6 +109,7 @@ def bind_model(model):
 
             retrieval_results[query] = ranked_list
         print('done')
+        print(list(zip(range(len(retrieval_results)), retrieval_results.items())))
 
         return list(zip(range(len(retrieval_results)), retrieval_results.items()))
 
@@ -130,7 +150,7 @@ if __name__ == '__main__':
 
     # hyperparameters
     args.add_argument('--epochs', type=int, default=1)
-    args.add_argument('--batch_size', type=int, default=128)
+    args.add_argument('--batch_size', type=int, default=32)
 
     # DONOTCHANGE: They are reserved for nsml
     args.add_argument('--mode', type=str, default='train', help='submit일때 해당값이 test로 설정됩니다.')
@@ -147,6 +167,7 @@ if __name__ == '__main__':
 
     """ Densenet Model """
     model = densenet.DenseNet()
+    model.summary()
 
     bind_model(model)
 
@@ -156,7 +177,7 @@ if __name__ == '__main__':
     bTrainmode = False
     if config.mode == 'train':
 
-        nsml.load(checkpoint='default_densenet_model_1_990', session='team_33/ir_ph1_v2/25')           # load시 수정 필수!
+        nsml.load(checkpoint='submit2', session='team_33/ir_ph1_v2/38')           # load시 수정 필수!
 
         bTrainmode = True
 
@@ -173,43 +194,97 @@ if __name__ == '__main__':
         output_path = ['./img_list.pkl', './label_list.pkl']
         train_dataset_path = DATASET_PATH + '/train/train_data'
 
+        #nsml server에서 실행하는냐, 로컬에서 실행하느냐
         if nsml.IS_ON_NSML:
             # Caching file
+            #nsml.cache는 preprocess의 과정을 거친 값을 캐싱해 놓음, train_data_lader 는 preprocess의 과정을 거친다. (224,224,3)말고 (224,224)이미지 size
+            #train_data_loader는 data_loader.py 안에서 preprocess 시행 결과 : img_list, label_list 생성
+            #train_data_lader에서 ouput path에 저장해놓음 img_list는 ./img_list.pkl에 label_list는 ./label_list.pkl에
             nsml.cache(train_data_loader, data_path=train_dataset_path, img_size=input_shape[:2],
                        output_path=output_path)
         else:
             # local에서 실험할경우 dataset의 local-path 를 입력해주세요.
             train_data_loader(train_dataset_path, input_shape[:2], output_path=output_path)
 
+        #아래 과정에서 읽기 시작함
+        #pickle (현재 메모리에 살아있는 ?) 파이썬 객체 자체를 읽고 저장하기 위해
+        #type 그대로 python에서 만들어지는 모든 것들예) array([ 0.5488135 ,  0.71518937,  0.60276338,  0.54488318,  0.4236548 ,]
+        #with 문 자동으로 파일 close 해줌
         with open(output_path[0], 'rb') as img_f:
             img_list = pickle.load(img_f)
         with open(output_path[1], 'rb') as label_f:
             label_list = pickle.load(label_f)
 
+        #numpy 연산 가능하도록 numpy array로 바꾸는 게 핵심
         x_train = np.asarray(img_list)
         labels = np.asarray(label_list)
+        #목적 : categorical_crossentropy 사용을 위해, integer 를 binary class matrix로 반환
+        #shape(7,7) num class가 7인경우
+        #naver 예제의 keras to categorical 거치면 (7064,1000) shape의 형태
+        '''
+        [[1. 0. 0. 0. 0. 0. 0.]
+         [0. 1. 0. 0. 0. 0. 0.]
+         [0. 0. 1. 0. 0. 0. 0.]
+         [0. 0. 0. 1. 0. 0. 0.]
+         [0. 0. 0. 0. 1. 0. 0.]
+         [0. 0. 0. 0. 0. 1. 0.]
+         [0. 0. 0. 0. 0. 0. 1.]]
+ '''
         y_train = keras.utils.to_categorical(labels, num_classes=num_classes)
         x_train = x_train.astype('float32')
+
+
         x_train /= 255
+
+        x_train = x_train
         print(len(labels), 'train samples')
+
+
 
         """ Callback """
         monitor = 'acc'
         reduce_lr = ReduceLROnPlateau(monitor=monitor, patience=3)
 
+
         """ Training loop """
+        datagen = ImageDataGenerator(
+            rescale=1./255,
+            rotation_range=180,
+            width_shift_range=0.2,
+            height_shift_range=0.2,
+            shear_range=0.2,
+            zoom_range=0.2,
+            horizontal_flip=True,
+            vertical_flip=True)
+
+        datagen.fit(x_train)
+        #fig_generator에서 epoch 루프 수행
+        res = model.fit_generator(
+          datagen.flow(x_train, y_train, batch_size=batch_size),
+          steps_per_epoch=len(x_train)/32,
+          epochs= nb_epoch )
+
         for epoch in range(nb_epoch):
-            res = model.fit(x_train, y_train,
-                            batch_size=batch_size,
-                            initial_epoch=epoch,
-                            epochs=epoch + 1,
-                            callbacks=[reduce_lr],
-                            verbose=1,
-                            shuffle=True)
-            print(res.history)
-            train_loss, train_acc = res.history['loss'][0], res.history['acc'][0]
-            nsml.report(summary=True, epoch=epoch, epoch_total=nb_epoch, loss=train_loss, acc=train_acc)
-            if epoch % 10 == 0:
-                check = "default_DN_model_1_"+str(epoch)
-                print('checkpoint name : '+ check)
-                nsml.save(checkpoint=check)
+            print('Epoch', epoch)
+            batches = 0
+            for x_batch, y_batch in datagen.flow(x_train, y_train, batch_size=batch_size):
+                res = model.fit(x_train, y_train,
+                                batch_size=batch_size,
+                                initial_epoch=epoch,
+                                epochs=epoch + 1,
+                                callbacks=[reduce_lr],
+                                verbose=1,
+                                shuffle=True)
+                batches += 1
+                if batches >= len(x_train) / batch_size:
+                    # we need to break the loop by hand because
+                    # the generator loops indefinitely
+                    break
+                print(res.history)
+                train_loss, train_acc = res.history['loss'][0], res.history['acc'][0]
+                nsml.report(summary=True,  epoch=epoch, epoch_total=nb_epoch,loss=train_loss, acc=train_acc)
+                if epoch % 1 == 0:
+                    # check = "DN_model_2_"+str(epoch)
+                    check = 'submit2'
+                    print('checkpoint name : '+ check)
+                    nsml.save(checkpoint=check)
