@@ -27,8 +27,8 @@
           <file pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/RGBCode2Img.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="578">
-                  <caret line="34" column="24" selection-start-line="34" selection-start-column="24" selection-end-line="34" selection-end-column="24" />
+                <state relative-caret-position="85">
+                  <caret line="5" lean-forward="true" selection-start-line="5" selection-end-line="5" />
                   <folding>
                     <element signature="e#0#10#0" expanded="true" />
                   </folding>
@@ -110,6 +110,7 @@
       <find>referen</find>
       <find>ref</find>
       <find>getFileNames</find>
+      <find>txtPath</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -126,7 +127,7 @@
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="707" />
+    <option name="x" value="554" />
     <option name="width" value="2611" />
     <option name="height" value="1047" />
   </component>
@@ -313,7 +314,7 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="707" y="0" width="2611" height="1047" extended-state="0" />
+    <frame x="554" y="0" width="2611" height="1047" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info id="Favorites" order="0" side_tool="true" />
@@ -402,8 +403,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/RGBCode2Img.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="578">
-          <caret line="34" column="24" selection-start-line="34" selection-start-column="24" selection-end-line="34" selection-end-column="24" />
+        <state relative-caret-position="85">
+          <caret line="5" lean-forward="true" selection-start-line="5" selection-end-line="5" />
           <folding>
             <element signature="e#0#10#0" expanded="true" />
           </folding>
