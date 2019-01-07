@@ -7,8 +7,6 @@ import itertools
 txtPath = "./TextMining"
 
 def txt2list(ImgCount, txtPath, output_Path):
-    EmptyNpArr = np.arange(0, 244 * 244 * 3)  # 3채널 244*244이미지어레이 생성
-
     with open(txtPath) as f:
         txtList = f.readlines()
         txtList = str([x.strip() for x in txtList]) # 공백 제거
@@ -25,7 +23,7 @@ def txt2list(ImgCount, txtPath, output_Path):
     print(rgb_img)
 
     #이미지 출력
-    cv2.imwrite(output_Path + "/" + "ReferenceImg" + str(ImgCount) +".jpg", rgb_img)
+    cv2.imwrite(output_Path + "/" + "QueryImg" + str(ImgCount) +".jpg", rgb_img)
 
     # 테스트용 txt파일 작성
     # file = open("testfile.txt", "w")
@@ -34,8 +32,11 @@ def txt2list(ImgCount, txtPath, output_Path):
     # file.close()
 
 if __name__ == '__main__':
-    output_Path = "./TextMiningResImgs"
-    txtfilePath = "./TextMining"
-    txtfilePathList = os.listdir(txtfilePath) #경로 내 모든 파일들의 디렉토리를 받아옴.
+    TextMining_referenceImgs = "./TextMining_referenceImgs" #레퍼런스 이미지의 row txt파일 경로
+    TextMining_queryImgs = "./TextMining_queryImgs" #쿼리 이미지의 row txt파일 경로
+    referenceImgs_output_Path = "./TextMiningResImgs_reference" #디코드된 레퍼런스 이미지가 저장되는 경로
+    queryImgs_output_Path = "./TextMiningResImgs_query" #디코드된 쿼리 이미지가 저장되는 경로
+
+    txtfilePathList = os.listdir(TextMining_queryImgs) #경로 내 모든 파일들의 디렉토리를 받아옴.
     for ImgCount in range(len(txtfilePathList)):
-        txt2list(ImgCount, txtfilePath +"/" +txtfilePathList[ImgCount], output_Path)
+        txt2list(ImgCount, TextMining_queryImgs + "/" + txtfilePathList[ImgCount], queryImgs_output_Path)

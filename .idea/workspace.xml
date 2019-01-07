@@ -27,8 +27,8 @@
           <file pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/RGBCode2Img.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="-87">
-                  <caret line="6" column="24" selection-start-line="6" selection-start-column="24" selection-end-line="6" selection-end-column="24" />
+                <state relative-caret-position="578">
+                  <caret line="34" column="24" selection-start-line="34" selection-start-column="24" selection-end-line="34" selection-end-column="24" />
                   <folding>
                     <element signature="e#0#10#0" expanded="true" />
                   </folding>
@@ -73,8 +73,11 @@
           <file pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/OtherFiles/ImgNetTest/ImgPreprocessing.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="76">
-                  <caret line="4" selection-start-line="4" selection-end-line="4" selection-end-column="16" />
+                <state relative-caret-position="589">
+                  <caret line="31" column="64" selection-start-line="31" selection-start-column="64" selection-end-line="31" selection-end-column="64" />
+                  <folding>
+                    <element signature="e#0#9#0" expanded="true" />
+                  </folding>
                 </state>
               </provider>
             </entry>
@@ -145,11 +148,6 @@
               <item name="AI-Vision2018" type="b2602c69:ProjectViewProjectNode" />
               <item name="AI-Vision2018" type="462c0819:PsiDirectoryNode" />
               <item name="OtherFiles" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="AI-Vision2018" type="b2602c69:ProjectViewProjectNode" />
-              <item name="AI-Vision2018" type="462c0819:PsiDirectoryNode" />
-              <item name="TextMining" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -327,7 +325,7 @@
       <window_info anchor="bottom" id="Terminal" order="3" />
       <window_info anchor="bottom" id="Message" order="4" />
       <window_info anchor="bottom" id="Find" order="5" />
-      <window_info active="true" anchor="bottom" id="Run" order="6" visible="true" weight="0.27710843" />
+      <window_info active="true" anchor="bottom" id="Run" order="6" visible="true" weight="0.12048193" />
       <window_info anchor="bottom" id="Debug" order="7" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="8" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="9" weight="0.4" />
@@ -404,8 +402,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/RGBCode2Img.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-87">
-          <caret line="6" column="24" selection-start-line="6" selection-start-column="24" selection-end-line="6" selection-end-column="24" />
+        <state relative-caret-position="578">
+          <caret line="34" column="24" selection-start-line="34" selection-start-column="24" selection-end-line="34" selection-end-column="24" />
           <folding>
             <element signature="e#0#10#0" expanded="true" />
           </folding>
