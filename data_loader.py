@@ -12,11 +12,23 @@ def train_data_loader(data_path, img_size, output_path):
     label_list = []
     img_list = []
     label_idx = 0
+
+    #sum = 0
+    #max = 0
+
     for root, dirs, files in os.walk(data_path):
         if not files:
             continue
-        print(str(label_idx) + " : " + str(len(files)))
+        #if(len(files)>max):
+        #    max = len(files)
+        print(str(i) + " : " + str(len(files)))
+        #sum = sum + len(files)
+        filenum = 0
         for filename in files:
+            print('files[0]' + str(files[0]))
+            print('files[1]' + str(files[1]))
+            print('files[2]' + str(files[2]))
+            print(str(i) + "class ," +str(filenum)+"filenum,"+ filename+"filename")
             img_path = os.path.join(root, filename)
             try:
                 img = cv2.imread(img_path, 1)
@@ -26,14 +38,15 @@ def train_data_loader(data_path, img_size, output_path):
                 continue
             label_list.append(label_idx)
             img_list.append(img)
+            filenum +=1 #
         label_idx += 1
 
+    #print("max : " + str(max))
     # write output file for caching
     with open(output_path[0], 'wb') as img_f:
         pickle.dump(img_list, img_f)
     with open(output_path[1], 'wb') as label_f:
         pickle.dump(label_list, label_f)
-
 
 def train_val_data_loader(data_path, img_size, output_path):
     label_list_train = []
