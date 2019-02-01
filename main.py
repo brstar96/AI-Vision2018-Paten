@@ -170,7 +170,7 @@ if __name__ == '__main__':
 
         train_dataset_path = DATASET_PATH + '/train/train_data'
         class_list = [0] * num_classes
-        img_list,label_list,class_list = train_data_balancing(train_dataset_path, input_shape[:2],  class_list, )
+        img_list,label_list,class_list = train_data_balancing(train_dataset_path, input_shape[:2],  class_list)
         img_list,label_list,class_list = train_data_balancing(train_dataset_path, input_shape[:2],  class_list)
         img_list,label_list,class_list = train_data_balancing(train_dataset_path, input_shape[:2],  class_list)
         img_list,label_list,class_list = train_data_balancing(train_dataset_path, input_shape[:2],  class_list)
