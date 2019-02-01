@@ -12,12 +12,10 @@ def train_data_loader(data_path, img_size, output_path):
     label_list = []
     img_list = []
     label_idx = 0
-    i = 0
     for root, dirs, files in os.walk(data_path):
         if not files:
             continue
-        print(str(i) + " : " + str(len(files)))
-        i += 1
+        print(str(label_idx) + " : " + str(len(files)))
         for filename in files:
             img_path = os.path.join(root, filename)
             try:
@@ -43,7 +41,6 @@ def train_val_data_loader(data_path, img_size, output_path):
     label_list_val = []
     img_list_val = []
     label_idx = 0  # val이든 train이든 상관없이 매번 증가되어야만 함
-    #i = 0
     val_send_check = False # 처음에 val이 들어갔는지
     for root, dirs, files in os.walk(data_path):
         if not files:
