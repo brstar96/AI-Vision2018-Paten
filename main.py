@@ -169,12 +169,6 @@ if __name__ == '__main__':
         print('dataset path', DATASET_PATH)
 
         train_dataset_path = DATASET_PATH + '/train/train_data'
-        class_list = [0] * num_classes
-        img_list,label_list,class_list = train_data_balancing(train_dataset_path, input_shape[:2],  class_list)
-        img_list,label_list,class_list = train_data_balancing(train_dataset_path, input_shape[:2],  class_list)
-        img_list,label_list,class_list = train_data_balancing(train_dataset_path, input_shape[:2],  class_list)
-        img_list,label_list,class_list = train_data_balancing(train_dataset_path, input_shape[:2],  class_list)
-        img_list,label_list,class_list = train_data_balancing(train_dataset_path, input_shape[:2],  class_list)
-        img_list,label_list,class_list = train_data_balancing(train_dataset_path, input_shape[:2],  class_list)
-        img_list,label_list,class_list = train_data_balancing(train_dataset_path, input_shape[:2],  class_list)
+        nb_epoch = 7 # test 하려고 임의로 지정한 수, 첫번째 클래스가 6개여서, 실제 사용할 때는 config 에서 아규먼트로 받은 --epoch 숫자가 들어간다. 
+        img_list,label_list = train_data_balancing(train_dataset_path, input_shape[:2],  num_classes, nb_epoch) #nb_epoch은 0~1382개 뽑히는 리스트가 총 몇 번 iteration 하고 싶은지
 
