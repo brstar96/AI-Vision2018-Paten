@@ -17,6 +17,7 @@ from keras.layers import Dense, Dropout, Flatten, Activation
 from keras.layers import Conv2D, MaxPooling2D
 from keras.callbacks import ReduceLROnPlateau
 from keras.preprocessing.image import ImageDataGenerator
+from data_loader import train_data_loader,train_data_balancing
 
 
 def bind_model(model):
@@ -167,42 +168,13 @@ if __name__ == '__main__':
 
         print('dataset path', DATASET_PATH)
 
-        train_datagen = ImageDataGenerator(
-            rescale=1. / 255,
-            shear_range=0.2,
-            zoom_range=0.2,
-            horizontal_flip=True)
+        train_dataset_path = DATASET_PATH + '/train/train_data'
+        class_list = [0] * num_classes
+        img_list,label_list,class_list = train_data_balancing(train_dataset_path, input_shape[:2],  class_list, )
+        img_list,label_list,class_list = train_data_balancing(train_dataset_path, input_shape[:2],  class_list)
+        img_list,label_list,class_list = train_data_balancing(train_dataset_path, input_shape[:2],  class_list)
+        img_list,label_list,class_list = train_data_balancing(train_dataset_path, input_shape[:2],  class_list)
+        img_list,label_list,class_list = train_data_balancing(train_dataset_path, input_shape[:2],  class_list)
+        img_list,label_list,class_list = train_data_balancing(train_dataset_path, input_shape[:2],  class_list)
+        img_list,label_list,class_list = train_data_balancing(train_dataset_path, input_shape[:2],  class_list)
 
-        train_generator = train_datagen.flow_from_directory(
-            directory=DATASET_PATH + '/train/train_data',
-            target_size=input_shape[:2],
-            color_mode="rgb",
-            batch_size=batch_size,
-            class_mode="categorical",
-            shuffle=True,
-            seed=42
-        )
-
-        """ Callback """
-        monitor = 'acc'
-        reduce_lr = ReduceLROnPlateau(monitor=monitor, patience=3)
-
-        """ Training loop """
-        STEP_SIZE_TRAIN = train_generator.n // train_generator.batch_size
-        t0 = time.time()
-        for epoch in range(nb_epoch):
-            t1 = time.time()
-            res = model.fit_generator(generator=train_generator,
-                                      steps_per_epoch=STEP_SIZE_TRAIN,
-                                      initial_epoch=epoch,
-                                      epochs=epoch + 1,
-                                      callbacks=[reduce_lr],
-                                      verbose=1,
-                                      shuffle=True)
-            t2 = time.time()
-            print(res.history)
-            print('Training time for one epoch : %.1f' % ((t2 - t1)))
-            train_loss, train_acc = res.history['loss'][0], res.history['acc'][0]
-            nsml.report(summary=True, epoch=epoch, epoch_total=nb_epoch, loss=train_loss, acc=train_acc)
-            nsml.save(epoch)
-        print('Total training time : %.1f' % (time.time() - t0))
