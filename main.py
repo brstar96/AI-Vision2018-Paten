@@ -19,7 +19,7 @@ from keras.callbacks import ReduceLROnPlateau
 from keras.preprocessing.image import ImageDataGenerator
 from data_loader import train_data_loader,train_data_balancing
 
-
+np.set_printoptions(threshold=np.nan)
 def bind_model(model):
     def save(dir_name):
         os.makedirs(dir_name, exist_ok=True)
@@ -105,6 +105,17 @@ def get_feature(model, queries, db):
 
     return queries, query_vecs, db, reference_vecs
 
+def balancing_process(train_dataset_path,input_shape, num_classes,nb_epoch):
+    img_list = []
+    label_list = []
+    img_list, label_list = train_data_balancing(train_dataset_path, input_shape[:2], num_classes,nb_epoch)  # nb_epoch은 0~1382개 뽑히는 리스트가 총 몇 번 iteration 하고 싶은지
+    # print("list"+str(1)+" label : "+str(label_list[1])+", img : "+str(img_list[1])) 뽑힌 리스트의 내용 확인하는 출력문구
+    x_train = np.asarray(img_list)  # (1383, 224, 224, 3)
+    labels = np.asarray(label_list)  # (1383,)
+    y_train = keras.utils.to_categorical(labels, num_classes=num_classes)  # (1383, 1383)
+    x_train = x_train.astype('float32')
+    return x_train,y_train
+
 
 if __name__ == '__main__':
     args = argparse.ArgumentParser()
@@ -165,10 +176,50 @@ if __name__ == '__main__':
         model.compile(loss='categorical_crossentropy',
                       optimizer=opt,
                       metrics=['accuracy'])
-
-        print('dataset path', DATASET_PATH)
-
         train_dataset_path = DATASET_PATH + '/train/train_data'
-        nb_epoch = 7 # test 하려고 임의로 지정한 수, 첫번째 클래스가 6개여서, 실제 사용할 때는 config 에서 아규먼트로 받은 --epoch 숫자가 들어간다. 
-        img_list,label_list = train_data_balancing(train_dataset_path, input_shape[:2],  num_classes, nb_epoch) #nb_epoch은 0~1382개 뽑히는 리스트가 총 몇 번 iteration 하고 싶은지
+
+        # type 그대로 python에서 만들어지는 모든 것들예) array([ 0.5488135 ,  0.71518937,  0.60276338,  0.54488318,  0.4236548 ,]
+        # with 문 자동으로 파일 close 해줌
+
+        # img_list,label_list = train_data_balancing(train_dataset_path, input_shape[:2],  num_classes, nb_epoch) #nb_epoch은 0~1382개 뽑히는 리스트가 총 몇 번 iteration 하고 싶은지
+        # print("list"+str(1)+" label : "+str(label_list[1])+", img : "+str(img_list[1])) 뽑힌 리스트의 내용 확인하는 출력문구
+        # x_train = np.asarray(img_list) #(1383, 224, 224, 3)
+        # labels = np.asarray(label_list) #(1383,)
+        # y_train = keras.utils.to_categorical(labels, num_classes=num_classes)  #(1383, 1383)
+        # x_train = x_train.astype('float32')
+
+        train_datagen = ImageDataGenerator(
+            rescale=1. / 255,
+            rotation_range=180,
+            width_shift_range=0.2,
+            height_shift_range=0.2,
+            shear_range=0.2,
+            zoom_range=0.2,
+            horizontal_flip=True,
+            vertical_flip=True
+        )
+
+        # model.fit_generator(datagen.flow(x_train, y_train, batch_size=batch_size),
+        #                    steps_per_epoch=len(x_train) / batch_size, epochs=epochs)
+
+        # here's a more "manual" example
+        for e in range(nb_epoch):
+            print('Epoch', e)
+            batches = 0
+            '''epoch에 맞게 x_rain,y_train가져오기 '''
+            x_train, y_train = balancing_process(train_dataset_path, input_shape, num_classes, e)
+            for x_batch, y_batch in train_datagen.flow(x_train, y_train, batch_size=batch_size):
+                model.fit(x_batch, y_batch)
+                batches += 1
+                if batches >= len(x_train) / batch_size:
+                    # we need to break the loop by hand becauseba
+                    # the generator loops indefinitely
+                    break
+        print('dataset path', DATASET_PATH)
+        output_path = ['./img_list.pkl', './label_list.pkl']
+       
+
+
+
+
 
