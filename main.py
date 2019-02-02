@@ -215,8 +215,7 @@ if __name__ == '__main__':
                     # we need to break the loop by hand becauseba
                     # the generator loops indefinitely
                     break
-        print('dataset path', DATASET_PATH)
-        output_path = ['./img_list.pkl', './label_list.pkl']
+
        
 
 
