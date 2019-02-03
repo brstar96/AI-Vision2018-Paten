@@ -50,6 +50,18 @@ def bind_model(model):
         references = np.asarray(references)
         reference_img = np.asarray(reference_img)
 
+        np.set_printoptions(threshold=np.nan)
+
+        '''
+        print('query_img.shape : '+str(query_img.shape))
+        print('reference_img.shape : ' + str(reference_img.shape))
+        for i in range(reference_img.shape[0]):
+            print('reference_img : ' + str(i))
+            print(reference_img[i])
+            print('')
+            print('')
+        '''
+
         print('queries')
         print(queries)
         print('references')
@@ -151,7 +163,7 @@ if __name__ == '__main__':
     args = argparse.ArgumentParser()
 
     # hyperparameters
-    args.add_argument('--epochs', type=int, default=1000)
+    args.add_argument('--epochs', type=int, default=1)
     args.add_argument('--batch_size', type=int, default=64)
 
     # DONOTCHANGE: They are reserved for nsml
@@ -185,6 +197,7 @@ if __name__ == '__main__':
 
         """ Initiate RMSprop optimizer """
         # opt = keras.optimizers.rmsprop(lr=0.00045, decay=1e-6)
+
         opt = keras.optimizers.Adam(lr = 1e-4)
 
         model.compile(loss='categorical_crossentropy',
@@ -243,8 +256,8 @@ if __name__ == '__main__':
             print(res.history)
             train_loss, train_acc = res.history['loss'][0], res.history['acc'][0]
             nsml.report(summary=True, epoch=epoch, epoch_total=nb_epoch, loss=train_loss, acc=train_acc)
-            if epoch % 10 == 0:
-                check = "DN_model_3_"+str(epoch)
-                # check = 'submit1_2'
+            if epoch % 1 == 0:
+                # check = "DN_model_3_"+str(epoch)
+                check = 'test'
                 print('checkpoint name : '+ check)
                 nsml.save(checkpoint=check)
