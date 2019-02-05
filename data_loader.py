@@ -7,48 +7,35 @@ import os
 import cv2
 import pickle
 
-def train_data_balancing(data_path, img_size,num_classes,nb_epoch):
-    class_list = [0] * num_classes  #class마다 이미지가 뽑혔을 때, 증가되는 수를 담기 위한 리스트 [0,0,0,0,0, ... 0] 1383개
-    nb_epoch += 1
-    for epoch_num in range(nb_epoch):
-        label_list = []
-        img_list = []
-        label_idx = 0
-        for root, dirs, files in os.walk(data_path):
-            if not files:
-                continue
-            filenum = class_list[label_idx]
-            #print(str(label_idx) + "class, " +str(filenum)+"filenum, "+ str(class_list[label_idx])+"class_list[label_idx]")
-            if(epoch_num<nb_epoch-1):
-                #print("epoch : "+str(epoch_num))
-                filenum += 1  # 매 클래스들마다 재사용됨
-                if (filenum == len(files)):
-                    filenum = 0  # 클래스가 가진 max 이미지 개수에 도달하면 초기화
-                class_list[label_idx] = filenum  # 클래스마다 몇번 째 이미지 인덱스가 뽑혀야하는 지 기록
-                label_idx += 1
-                continue
-            #print("i am last epoch")
-            ''' 이미지 읽어오는 과정'''
-            filename = files[filenum] #선별된 이미지 이름이 들어가도록 ex) 1. class_list에서 클래스에 맞는 filenum을 찾고 2. filenum을 files의 인덱스로
-            img_path = os.path.join(root, filename)
-            try:
-                img = cv2.imread(img_path, 1)
-                img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-                img = cv2.resize(img, img_size)
-            except:
-                continue
-            label_list.append(label_idx)
-            img_list.append(img)
 
-            filenum +=1 # 매 클래스들마다 재사용됨
-            if(filenum==len(files)):
-                filenum = 0 # 클래스가 가진 max 이미지 개수에 도달하면 초기화
-            class_list[label_idx] = filenum #클래스마다 몇번 째 이미지 인덱스가 뽑혀야하는 지 기록
-            label_idx += 1
-   # print(str(epoch_num) + "nb_epoch, " + "label_len : " + str(len(label_list)))
-    #print(str(epoch_num) + "nb_epoch, " + "img_len : " + str(len(img_list)))
-    #print(str(epoch_num) + "nb_epoch, " + "class_list_len : " + str(len(class_list)))
+def train_data_balancing(data_path, img_size,fork_epoch, nb_epoch):
+    # nb_epoch은 이전까지 돌아간 epoch 수
+    label_list = []
+    img_list = []
+    label_idx = 0
+
+    for root, dirs, files in os.walk(data_path):
+        if not files:
+            continue
+        filenum = (int(fork_epoch)+1+nb_epoch) % len(files) #checkpoint 다음이어서 +1
+
+        ''' 이미지 읽어오는 과정'''
+        #print("fork_epoch"+fork_epoch+"filenum : "+str(filenum))
+        filename = files[filenum]  # 선별된 이미지 이름이 들어가도록 ex) 1. class_list에서 클래스에 맞는 filenum을 찾고 2. filenum을 files의 인덱스로
+        img_path = os.path.join(root, filename)
+        try:
+            img = cv2.imread(img_path, 1)
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            img = cv2.resize(img, img_size)
+        except:
+            continue
+        label_list.append(label_idx)
+        img_list.append(img)
+        label_idx += 1
+    # print("label_len : " + str(len(label_list)))
+    # print( "img_len : " + str(len(img_list)))
     return img_list, label_list
+
 def train_data_loader(data_path, img_size, output_path):
     label_list = []
     img_list = []
