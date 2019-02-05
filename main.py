@@ -15,9 +15,15 @@ import keras
 from keras.models import Sequential, Model
 from keras.layers import Dense, Dropout, Flatten, Activation
 from keras.layers import Conv2D, MaxPooling2D
-from keras.callbacks import ReduceLROnPlateau
+from keras.callbacks import ReduceLROnPlateau, LearningRateScheduler
 from keras.preprocessing.image import ImageDataGenerator
 from data_loader import train_data_loader,train_data_balancing
+from keras.applications.densenet import *
+from keras.utils.training_utils import multi_gpu_model
+from keras.applications.nasnet import *
+import gc
+#import autokeras as ak
+
 
 np.set_printoptions(threshold=np.nan)
 def bind_model(model):
@@ -73,13 +79,21 @@ def l2_normalize(v):
     return v / norm
 
 
+
 # data preprocess
 def get_feature(model, queries, db):
     img_size = (224, 224)
     test_path = DATASET_PATH + '/test/test_data'
 
-    intermediate_layer_model = Model(inputs=model.input, outputs=model.get_layer('dense_2').output)
-    test_datagen = ImageDataGenerator(rescale=1. / 255, dtype='float32')
+    intermediate_layer_model = Model(inputs=model.layers[0].input, outputs=model.layers[-1].output)
+    test_datagen = ImageDataGenerator(rescale=1. / 255,
+                                      dtype='float32',
+                                      featurewise_std_normalization=True,
+                                      featurewise_center=True)
+
+    test_datagen.mean = np.array([144.62598745, 132.1989693, 119.10957842], dtype=np.float32).reshape((1, 1, 3))
+    test_datagen.std = np.array([5.71350834, 7.67297079, 8.68071288], dtype=np.float32).reshape((1, 1, 3))
+
     query_generator = test_datagen.flow_from_directory(
         directory=test_path,
         target_size=(224, 224),
@@ -110,20 +124,24 @@ def balancing_process(train_dataset_path,input_shape, num_classes,nb_epoch):
     label_list = []
     img_list, label_list = train_data_balancing(train_dataset_path, input_shape[:2], num_classes,nb_epoch)  # nb_epoch은 0~1382개 뽑히는 리스트가 총 몇 번 iteration 하고 싶은지
     # print("list"+str(1)+" label : "+str(label_list[1])+", img : "+str(img_list[1])) 뽑힌 리스트의 내용 확인하는 출력문구
-    x_train = np.asarray(img_list)  # (1383, 224, 224, 3)
+
+    x_train = np.asarray(img_list, dtype=np.float32)  # (1383, 224, 224, 3)
     labels = np.asarray(label_list)  # (1383,)
     y_train = keras.utils.to_categorical(labels, num_classes=num_classes)  # (1383, 1383)
-    x_train = x_train.astype('float32')
-    return x_train,y_train
+
+    return x_train, y_train
 
 
 if __name__ == '__main__':
     args = argparse.ArgumentParser()
 
     # hyperparameters
-    args.add_argument('--epoch', type=int, default=5)
+    # epochs가 없으면 fork시 버그 걸려서 넣어둠
+    args.add_argument('--epochs', type=int, default=10000)
+    args.add_argument('--epoch', type=int, default=10000)
     args.add_argument('--batch_size', type=int, default=64)
     args.add_argument('--num_classes', type=int, default=1383)
+    args.add_argument('--lr', type=float, default=0.001)
 
     # DONOTCHANGE: They are reserved for nsml
     args.add_argument('--mode', type=str, default='train', help='submit일때 해당값이 test로 설정됩니다.')
@@ -137,30 +155,15 @@ if __name__ == '__main__':
     batch_size = config.batch_size
     num_classes = config.num_classes
     input_shape = (224, 224, 3)  # input image shape
+    lr = config.lr
+    st_epoch = config.iteration #fork할 때, balancing count 받아오기 위해서 iteration = start epoch
 
     """ Model """
-    model = Sequential()
-    model.add(Conv2D(32, (3, 3), padding='same', input_shape=input_shape))
-    model.add(Activation('relu'))
-    model.add(Conv2D(32, (3, 3)))
-    model.add(Activation('relu'))
-    model.add(MaxPooling2D(pool_size=(2, 2)))
-    model.add(Dropout(0.25))
-
-    model.add(Conv2D(64, (3, 3), padding='same'))
-    model.add(Activation('relu'))
-    model.add(Conv2D(64, (3, 3)))
-    model.add(Activation('relu'))
-    model.add(MaxPooling2D(pool_size=(2, 2)))
-    model.add(Dropout(0.25))
-
-    model.add(Flatten())
-    model.add(Dense(512))
-    model.add(Activation('relu'))
-    model.add(Dropout(0.5))
-    model.add(Dense(num_classes))
-    model.add(Activation('softmax'))
+    #model = DenseNet201(input_shape=input_shape, weights=None, include_top = True, classes = num_classes)
+    model = NASNetMobile(input_shape=input_shape, weights=None, include_top = True, classes = num_classes)
+    #model = multi_gpu_model(model, gpus=2)
     model.summary()
+
 
     bind_model(model)
 
@@ -171,8 +174,12 @@ if __name__ == '__main__':
     if config.mode == 'train':
         bTrainmode = True
 
+        nsml.load(checkpoint=359, session='team_33/ir_ph2/171')           # load시 수정 필수!
+        nsml.save(359)
+
         """ Initiate RMSprop optimizer """
-        opt = keras.optimizers.rmsprop(lr=0.00045, decay=1e-6)
+        #opt = keras.optimizers.rmsprop(lr=lr, decay=1e-6)
+        opt = keras.optimizers.SGD(lr=lr, momentum=0.9, nesterov=True, decay= 1e-5)
         model.compile(loss='categorical_crossentropy',
                       optimizer=opt,
                       metrics=['accuracy'])
@@ -196,26 +203,96 @@ if __name__ == '__main__':
             shear_range=0.2,
             zoom_range=0.2,
             horizontal_flip=True,
-            vertical_flip=True
+            vertical_flip=True,
+            featurewise_center=True,
+            featurewise_std_normalization=True
         )
+
+        # mean RGB: [144.62598745, 132.1989693, 119.10957842]
+        # std RGB: [5.71350834, 7.67297079, 8.68071288]
+        train_datagen.mean = np.array([144.62598745, 132.1989693, 119.10957842], dtype=np.float32).reshape((1,1,3))
+        train_datagen.std = np.array([5.71350834, 7.67297079, 8.68071288], dtype=np.float32).reshape((1, 1, 3))
+
+
+        """ Callback """
+        monitor = 'acc'
+        reduce_lr = ReduceLROnPlateau(monitor=monitor, patience=3, verbose=1)
+
 
         # model.fit_generator(datagen.flow(x_train, y_train, batch_size=batch_size),
         #                    steps_per_epoch=len(x_train) / batch_size, epochs=epochs)
 
         # here's a more "manual" example
+
+        t0 = time.time()
         for e in range(nb_epoch):
-            print('Epoch', e)
-            batches = 0
+            t1 = time.time()
+            print('Epochs : ', e)
+            #batches = 0
             '''epoch에 맞게 x_rain,y_train가져오기 '''
             x_train, y_train = balancing_process(train_dataset_path, input_shape, num_classes, e)
-            for x_batch, y_batch in train_datagen.flow(x_train, y_train, batch_size=batch_size):
-                model.fit(x_batch, y_batch)
-                batches += 1
-                if batches >= len(x_train) / batch_size:
-                    # we need to break the loop by hand becauseba
-                    # the generator loops indefinitely
-                    break
+            #model.evaluate(x_train, y_train, batch_size=batch_size,verbose=1)
+            #print(x_train.shape)
 
+            train_generator = train_datagen.flow(
+                x_train, y_train,
+                batch_size=batch_size,
+                shuffle=True,
+            )
+
+            STEP_SIZE_TRAIN = train_generator.n // train_generator.batch_size
+            res = model.fit_generator(generator=train_generator,
+                                      steps_per_epoch=STEP_SIZE_TRAIN,
+                                      initial_epoch=e,
+                                      epochs=e + 1,
+                                      callbacks=[reduce_lr],
+                                      verbose=1,
+                                      shuffle=True,
+                                      )
+
+            t2 = time.time()
+            print(res.history)
+            print('Training time for one epoch : %.1f' % ((t2 - t1)))
+            train_loss, train_acc = res.history['loss'][0], res.history['acc'][0]
+            #val_loss, val_acc = res.history['val_loss'][0], res.history['val_acc'][0]
+            nsml.report(summary=True, epoch=e, epoch_total=nb_epoch, loss=train_loss, acc=train_acc)#, val_loss=val_loss, val_acc=val_acc)
+            if (e+1) % 40 == 0:
+                nsml.save(e)
+                print('checkpoint name : ' + str(e))
+            # 메모리 해제
+            del x_train
+            del y_train
+            gc.collect()
+        print('Total training time : %.1f' % (time.time() - t0))
+
+
+        '''
+            for x_batch, y_batch in train_datagen.flow(x_train, y_train, batch_size=batch_size):
+
+                #print(x_batch.shape)
+                res = model.fit(x_batch,
+                              y_batch,
+                              callbacks=[reduce_lr],
+                              verbose=0,
+                              shuffle=True
+                              )
+
+            t2 = time.time()
+            print(res.history)
+            print('Training time for one epoch : %.1f' % ((t2 - t1)))
+            train_loss, train_acc = res.history['loss'][0], res.history['acc'][0]
+            #val_loss, val_acc = res.history['val_loss'][0], res.history['val_acc'][0]
+            nsml.report(summary=True, epoch=e, epoch_total=nb_epoch, loss=train_loss, acc=train_acc) #, val_loss=val_loss, val_acc=val_acc)
+            if (e-1) % 5 == 0:
+                nsml.save(e)
+                print('checkpoint name : ' + str(e))
+            batches += 1
+            if batches >= len(x_train) / batch_size:
+                # we need to break the loop by hand becauseba
+                # the generator loops indefinitely
+                break
+        print('Total training time : %.1f' % (time.time() - t0))
+        '''
        
 
 
