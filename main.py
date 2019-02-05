@@ -148,10 +148,7 @@ def AddFineTuningLayer(model_Input, modelname):
         model_Input.trainable = False
         x = model_Input.output
         x = GlobalAveragePooling2D()(x)
-        x = Dense(1024, activation='relu')(x)
-        x = Dense(1024, activation='relu')(x)
-        x = Dense(1000)(x)
-        x = Activation('softmax')(x)
+        x =Dense(config.num_classes, activation='softmax', name='fc1383')(x)
         model = Model(model_Input.input, outputs=x)
         model.summary()
         return model
@@ -240,7 +237,6 @@ if __name__ == '__main__':
     lr = config.lr
 
     """ Base Models """
-    modelnames = ['VGG16', 'ResNet50', 'DenseNet201']
     base_model1 = VGG16(input_shape=input_shape, weights='imagenet', include_top=False, classes=num_classes)
     base_model2 = ResNet50(input_shape=input_shape, weights='imagenet', include_top=False, classes=num_classes)
     base_model3 = DenseNet201(input_shape=input_shape, weights='imagenet', include_top=False, classes=num_classes)
