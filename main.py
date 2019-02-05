@@ -298,11 +298,12 @@ if __name__ == '__main__':
         reduce_lr = ReduceLROnPlateau(monitor=monitor, patience=2, verbose=1)
 
     """ Model Fit, Training Loop, Checkpoint save """
+    FittedModels = []
     for modelnum in models:
-        model_Fit(models[modelnum])
+        FittedModels[modelnum] = model_Fit(models[modelnum])
 
     """ 3 Model ensemble """
-    ensemble_model = Ensemble(models)
+    ensemble_model = Ensemble(FittedModels)
     bind_model(ensemble_model)
 
     '''
