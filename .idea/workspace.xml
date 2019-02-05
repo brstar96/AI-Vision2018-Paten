@@ -13,11 +13,10 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="732">
-              <caret line="283" column="35" lean-forward="true" selection-start-line="283" selection-start-column="35" selection-end-line="283" selection-end-column="35" />
+            <state relative-caret-position="313">
+              <caret line="145" column="20" lean-forward="true" selection-start-line="145" selection-start-column="20" selection-end-line="145" selection-end-column="20" />
               <folding>
                 <element signature="e#24#62#0" expanded="true" />
-                <element signature="e#10668#11803#1" />
               </folding>
             </state>
           </provider>
@@ -36,7 +35,7 @@
         <entry file="file://C:/Python3_5/Lib/site-packages/keras/applications/densenet.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="510">
-              <caret line="22" lean-forward="true" selection-start-line="22" selection-end-line="22" />
+              <caret line="22" selection-start-line="22" selection-end-line="22" />
             </state>
           </provider>
         </entry>
@@ -44,7 +43,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://C:/Python3_5/Lib/argparse.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="309">
+            <state relative-caret-position="51510">
               <caret line="1724" column="8" selection-start-line="1724" selection-start-column="8" selection-end-line="1724" selection-end-column="8" />
             </state>
           </provider>
@@ -58,7 +57,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/data_loader.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="75">
+            <state relative-caret-position="90">
               <caret line="9" column="10" selection-start-line="9" selection-start-column="10" selection-end-line="9" selection-end-column="10" />
             </state>
           </provider>
@@ -79,9 +78,13 @@
       <find>train_data_loader</find>
       <find>train_data_balancing</find>
       <find>balancing_process</find>
-      <find>bind_model</find>
-      <find>AddFineTuningLayer</find>
       <find>Model</find>
+      <find>batch</find>
+      <find>get_feature</find>
+      <find>bind_model</find>
+      <find>model_Fit</find>
+      <find>AddFineTuningLayer</find>
+      <find>include_top</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -95,8 +98,8 @@
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="1083" />
-    <option name="width" value="1616" />
+    <option name="x" value="1216" />
+    <option name="width" value="1483" />
     <option name="height" value="1087" />
   </component>
   <component name="ProjectView">
@@ -104,6 +107,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -115,11 +119,10 @@
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
-    <property name="last_opened_file_path" value="$USER_HOME$/Desktop/team_33_ir_ph1_v2_221" />
+    <property name="last_opened_file_path" value="$USER_HOME$/Desktop/MVCNN-TensorFlow-master" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
   <component name="RunDashboard">
@@ -148,10 +151,10 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="1083" y="0" width="1616" height="1087" extended-state="0" />
+    <frame x="1216" y="0" width="1483" height="1087" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.18631178" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.2034602" />
       <window_info id="Structure" order="1" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -173,27 +176,13 @@
   </component>
   <component name="editorHistoryManager">
     <entry file="file://C:/Python352/Lib/site-packages/keras/applications/vgg16.py" />
-    <entry file="file://$PROJECT_DIR$/data_loader.py">
+    <entry file="file://$PROJECT_DIR$/main.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="75">
-          <caret line="9" column="10" selection-start-line="9" selection-start-column="10" selection-end-line="9" selection-end-column="10" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/setup.py">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://C:/Python3_5/Lib/argparse.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="309">
-          <caret line="1724" column="8" selection-start-line="1724" selection-start-column="8" selection-end-line="1724" selection-end-column="8" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://C:/Python3_5/Lib/site-packages/keras/applications/densenet.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="510">
-          <caret line="22" lean-forward="true" selection-start-line="22" selection-end-line="22" />
+        <state relative-caret-position="313">
+          <caret line="145" column="20" lean-forward="true" selection-start-line="145" selection-start-column="20" selection-end-line="145" selection-end-column="20" />
+          <folding>
+            <element signature="e#24#62#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -204,14 +193,27 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/main.py">
+    <entry file="file://C:/Python3_5/Lib/site-packages/keras/applications/densenet.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="732">
-          <caret line="283" column="35" lean-forward="true" selection-start-line="283" selection-start-column="35" selection-end-line="283" selection-end-column="35" />
-          <folding>
-            <element signature="e#24#62#0" expanded="true" />
-            <element signature="e#10668#11803#1" />
-          </folding>
+        <state relative-caret-position="510">
+          <caret line="22" selection-start-line="22" selection-end-line="22" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://C:/Python3_5/Lib/argparse.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="51510">
+          <caret line="1724" column="8" selection-start-line="1724" selection-start-column="8" selection-end-line="1724" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/setup.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/data_loader.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="90">
+          <caret line="9" column="10" selection-start-line="9" selection-start-column="10" selection-end-line="9" selection-end-column="10" />
         </state>
       </provider>
     </entry>

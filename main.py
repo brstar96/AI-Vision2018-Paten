@@ -73,14 +73,11 @@ def bind_model(model):
     # DONOTCHANGE: They are reserved for nsml
     nsml.bind(save=save, load=load, infer=infer)
 
-
 def l2_normalize(v):
     norm = np.linalg.norm(v)
     if norm == 0:
         return v
     return v / norm
-
-
 
 # data preprocess
 def get_feature(model, queries, db):
@@ -133,22 +130,46 @@ def balancing_process(train_dataset_path,input_shape, num_classes,nb_epoch):
 
     return x_train, y_train
 
-def AddFineTuningLayer(model_Input):
-    # include_top = False이면 FCN레이어 미포함
-    model_Input.trainable = False
-    x = model_Input.output
-    x = GlobalAveragePooling2D()(x)
-    x = Activation('softmax')(x)
-    model = Model(model_Input.input, outputs=x)
-
-    model.summary()
-    bind_model(model)
-    return model
+def AddFineTuningLayer(model_Input, modelname):
+    # include_top = False이면 FCN같은 마지막 레이어 미포함
+    if modelname == 'VGG16':
+        model_Input.trainable = False
+        x = model_Input.output
+        # Classification block (codes from 'vgg16.py' on keras official github)
+        x = Flatten(name='flatten')(x)
+        x = Dense(4096, activation='relu', name='fc1')(x)
+        x = Dense(4096, activation='relu', name='fc2')(x)
+        x = Dense(config.num_classes, activation='softmax', name='predictions')(x)
+        # x = GlobalAveragePooling2D()(x)
+        model = Model(model_Input.input, outputs=x)
+        model.summary()
+        return model
+    elif modelname == 'ResNet50':
+        model_Input.trainable = False
+        x = model_Input.output
+        x = GlobalAveragePooling2D()(x)
+        x = Dense(1024, activation='relu')(x)
+        x = Dense(1024, activation='relu')(x)
+        x = Dense(1000)(x)
+        x = Activation('softmax')(x)
+        model = Model(model_Input.input, outputs=x)
+        model.summary()
+        return model
+    elif modelname == 'DenseNet201':
+        x = model_Input.output
+        x = GlobalAveragePooling2D()(x)
+        x = Activation('softmax')(x)
+        model = Model(model_Input.input, outputs=x)
+        model.summary()
+        return model
+    else:
+        NotImplementedError
 
 def Ensemble(models, model_input):
+    # 3개의 모델로부터 나온 softmax 확률값을 평균냄.
     outputs = [model.outputs[0] for model in models]
-    y = Average()(outputs)
-    Finalmodel = Model(model_input, y, name='ensemble')
+    merged = Average()(outputs)
+    Finalmodel = Model(model_input, merged, name='ensemble')
     return Finalmodel
 
 def model_Fit(model):
@@ -198,8 +219,8 @@ if __name__ == '__main__':
 
     # hyperparameters
     # epochs가 없으면 fork시 버그 걸려서 넣어둠
-    args.add_argument('--epochs', type=int, default=10000)
-    args.add_argument('--epoch', type=int, default=10000)
+    args.add_argument('--epochs', type=int, default=1)
+    args.add_argument('--epoch', type=int, default=1)
     args.add_argument('--batch_size', type=int, default=64)
     args.add_argument('--num_classes', type=int, default=1383)
     args.add_argument('--lr', type=float, default=0.001)
@@ -219,14 +240,15 @@ if __name__ == '__main__':
     lr = config.lr
 
     """ Base Models """
+    modelnames = ['VGG16', 'ResNet50', 'DenseNet201']
     base_model1 = VGG16(input_shape=input_shape, weights='imagenet', include_top=False, classes=num_classes)
     base_model2 = ResNet50(input_shape=input_shape, weights='imagenet', include_top=False, classes=num_classes)
     base_model3 = DenseNet201(input_shape=input_shape, weights='imagenet', include_top=False, classes=num_classes)
 
     """ Add Finetuning Layers"""
-    model1 = AddFineTuningLayer(base_model1)
-    model2 = AddFineTuningLayer(base_model2)
-    model3 = AddFineTuningLayer(base_model3)
+    model1 = AddFineTuningLayer(base_model1, 'VGG16')
+    model2 = AddFineTuningLayer(base_model2, 'ResNet50')
+    model3 = AddFineTuningLayer(base_model3, 'DenseNet201')
     models = [model1, model2, model3]
 
     if config.pause:
@@ -285,6 +307,7 @@ if __name__ == '__main__':
 
     """ 3 Model ensemble """
     ensemble_model = Ensemble(models)
+    bind_model(ensemble_model)
 
     '''
         for x_batch, y_batch in train_datagen.flow(x_train, y_train, batch_size=batch_size):
@@ -313,9 +336,3 @@ if __name__ == '__main__':
             break
     print('Total training time : %.1f' % (time.time() - t0))
     '''
-       
-
-
-
-
-
