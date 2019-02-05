@@ -15,7 +15,7 @@ import keras
 from keras.models import Sequential, Model
 from keras.layers import Dense, Dropout, Flatten, Activation
 from keras.layers import Conv2D, MaxPooling2D
-from keras.callbacks import ReduceLROnPlateau
+from keras.callbacks import ReduceLROnPlateau, LearningRateScheduler
 from keras.preprocessing.image import ImageDataGenerator
 from data_loader import train_data_loader,train_data_balancing
 from keras.applications.densenet import *
@@ -85,7 +85,7 @@ def get_feature(model, queries, db):
     img_size = (224, 224)
     test_path = DATASET_PATH + '/test/test_data'
 
-    intermediate_layer_model = Model(inputs=model.layers[0].input, outputs=model.layers[-2].output)
+    intermediate_layer_model = Model(inputs=model.layers[0].input, outputs=model.layers[-1].output)
     test_datagen = ImageDataGenerator(rescale=1. / 255,
                                       dtype='float32',
                                       featurewise_std_normalization=True,
@@ -136,9 +136,12 @@ if __name__ == '__main__':
     args = argparse.ArgumentParser()
 
     # hyperparameters
+    # epochs가 없으면 fork시 버그 걸려서 넣어둠
+    args.add_argument('--epochs', type=int, default=10000)
     args.add_argument('--epoch', type=int, default=10000)
     args.add_argument('--batch_size', type=int, default=64)
     args.add_argument('--num_classes', type=int, default=1383)
+    args.add_argument('--lr', type=float, default=0.001)
 
     # DONOTCHANGE: They are reserved for nsml
     args.add_argument('--mode', type=str, default='train', help='submit일때 해당값이 test로 설정됩니다.')
@@ -152,9 +155,9 @@ if __name__ == '__main__':
     batch_size = config.batch_size
     num_classes = config.num_classes
     input_shape = (224, 224, 3)  # input image shape
-
+    lr = config.lr
     """ Model """
-    #model = DenseNet169(input_shape=input_shape, weights=None, include_top = True, classes = num_classes)
+    #model = DenseNet201(input_shape=input_shape, weights=None, include_top = True, classes = num_classes)
     model = NASNetMobile(input_shape=input_shape, weights=None, include_top = True, classes = num_classes)
     #model = multi_gpu_model(model, gpus=2)
     model.summary()
@@ -169,9 +172,12 @@ if __name__ == '__main__':
     if config.mode == 'train':
         bTrainmode = True
 
+        nsml.load(checkpoint=359, session='team_33/ir_ph2/171')           # load시 수정 필수!
+        nsml.save(359)
+
         """ Initiate RMSprop optimizer """
-        opt = keras.optimizers.rmsprop(lr=0.00025, decay=1e-6)
-        #opt = keras.optimizers.SGD(lr=0.0001, momentum=0.9, nesterov=True, decay= 1e-4)
+        #opt = keras.optimizers.rmsprop(lr=lr, decay=1e-6)
+        opt = keras.optimizers.SGD(lr=lr, momentum=0.9, nesterov=True, decay= 1e-5)
         model.compile(loss='categorical_crossentropy',
                       optimizer=opt,
                       metrics=['accuracy'])
@@ -208,7 +214,8 @@ if __name__ == '__main__':
 
         """ Callback """
         monitor = 'acc'
-        reduce_lr = ReduceLROnPlateau(monitor=monitor, patience=3)
+        reduce_lr = ReduceLROnPlateau(monitor=monitor, patience=3, verbose=1)
+
 
         # model.fit_generator(datagen.flow(x_train, y_train, batch_size=batch_size),
         #                    steps_per_epoch=len(x_train) / batch_size, epochs=epochs)
@@ -247,7 +254,7 @@ if __name__ == '__main__':
             train_loss, train_acc = res.history['loss'][0], res.history['acc'][0]
             #val_loss, val_acc = res.history['val_loss'][0], res.history['val_acc'][0]
             nsml.report(summary=True, epoch=e, epoch_total=nb_epoch, loss=train_loss, acc=train_acc)#, val_loss=val_loss, val_acc=val_acc)
-            if (e-1) % 50 == 0:
+            if (e+1) % 40 == 0:
                 nsml.save(e)
                 print('checkpoint name : ' + str(e))
             # 메모리 해제
