@@ -13,8 +13,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="911">
-              <caret line="170" lean-forward="true" selection-start-line="170" selection-end-line="170" />
+            <state relative-caret-position="711">
+              <caret line="162" column="27" lean-forward="true" selection-start-line="162" selection-start-column="27" selection-end-line="162" selection-end-column="27" />
               <folding>
                 <element signature="e#24#62#0" expanded="true" />
                 <element signature="e#10940#12075#1" />
@@ -24,60 +24,10 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://C:/Python3_5/Lib/site-packages/keras/engine/training.py">
+        <entry file="file://C:/Python3_5/Lib/site-packages/keras/layers/core.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="150">
-              <caret line="32" column="6" selection-start-line="32" selection-start-column="6" selection-end-line="32" selection-end-column="6" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://C:/Python3_5/Lib/site-packages/keras/applications/resnet50.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="150">
-              <caret line="10" column="18" selection-start-line="10" selection-start-column="18" selection-end-line="10" selection-end-column="18" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://C:/Python3_5/Lib/site-packages/keras_applications/resnet50.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="290">
-              <caret line="141" column="24" selection-start-line="141" selection-start-column="13" selection-end-line="141" selection-end-column="24" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://C:/Python3_5/Lib/site-packages/keras/applications/densenet.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="510">
-              <caret line="22" selection-start-line="22" selection-end-line="22" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://C:/Python3_5/Lib/argparse.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="51510">
-              <caret line="1724" column="8" selection-start-line="1724" selection-start-column="8" selection-end-line="1724" selection-end-column="8" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/setup.py">
-          <provider selected="true" editor-type-id="text-editor" />
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/data_loader.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="90">
-              <caret line="9" column="10" selection-start-line="9" selection-start-column="10" selection-end-line="9" selection-end-column="10" />
+            <state relative-caret-position="309">
+              <caret line="292" column="8" selection-start-line="292" selection-start-column="8" selection-end-line="292" selection-end-column="8" />
             </state>
           </provider>
         </entry>
@@ -91,7 +41,6 @@
       <find>model</find>
       <find>model1</find>
       <find>num_classes</find>
-      <find>bind</find>
       <find>trainable</find>
       <find>data_loader</find>
       <find>train_data_loader</find>
@@ -104,6 +53,7 @@
       <find>model_Fit</find>
       <find>AddFineTuningLayer</find>
       <find>include_top</find>
+      <find>bind</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -117,8 +67,9 @@
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="1216" />
-    <option name="width" value="1483" />
+    <option name="x" value="1182" />
+    <option name="y" value="18" />
+    <option name="width" value="1143" />
     <option name="height" value="1087" />
   </component>
   <component name="ProjectView">
@@ -170,10 +121,10 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="1216" y="0" width="1483" height="1087" extended-state="0" />
+    <frame x="1182" y="18" width="1143" height="1087" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.2034602" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.0841629" />
       <window_info id="Structure" order="1" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -195,13 +146,6 @@
   </component>
   <component name="editorHistoryManager">
     <entry file="file://C:/Python352/Lib/site-packages/keras/applications/vgg16.py" />
-    <entry file="file://C:/Python3_5/Lib/site-packages/keras/engine/training.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="150">
-          <caret line="32" column="6" selection-start-line="32" selection-start-column="6" selection-end-line="32" selection-end-column="6" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://C:/Python3_5/Lib/site-packages/keras/applications/densenet.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="510">
@@ -240,10 +184,24 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://C:/Python3_5/Lib/site-packages/keras/layers/core.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="309">
+          <caret line="292" column="8" selection-start-line="292" selection-start-column="8" selection-end-line="292" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://C:/Python3_5/Lib/site-packages/keras/engine/training.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="150">
+          <caret line="32" column="6" selection-start-line="32" selection-start-column="6" selection-end-line="32" selection-end-column="6" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/main.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="911">
-          <caret line="170" lean-forward="true" selection-start-line="170" selection-end-line="170" />
+        <state relative-caret-position="711">
+          <caret line="162" column="27" lean-forward="true" selection-start-line="162" selection-start-column="27" selection-end-line="162" selection-end-column="27" />
           <folding>
             <element signature="e#24#62#0" expanded="true" />
             <element signature="e#10940#12075#1" />

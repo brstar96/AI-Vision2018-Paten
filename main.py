@@ -12,7 +12,7 @@ import numpy as np
 
 from nsml import DATASET_PATH
 import keras
-from keras.models import Sequential, Model, Input
+from keras.models import Model, Input
 from keras.layers import Dense, Dropout, Flatten, Activation, GlobalAveragePooling2D, Average
 from keras.layers import Conv2D, MaxPooling2D
 from keras.callbacks import ReduceLROnPlateau, LearningRateScheduler
@@ -140,22 +140,22 @@ def AddFineTuningLayer(model_Input, modelname):
         x = Dense(4096, activation='relu', name='fc1')(x)
         x = Dense(4096, activation='relu', name='fc2')(x)
         x = Dense(config.num_classes, activation='softmax', name='predictions')(x)
-        # x = GlobalAveragePooling2D()(x)
         model = Model(model_Input.input, outputs=x)
         model.summary()
         return model
     elif modelname == 'ResNet50':
         model_Input.trainable = False
         x = model_Input.output
-        x = GlobalAveragePooling2D()(x)
+        x = GlobalAveragePooling2D(name='avg_pool')(x)
         x =Dense(config.num_classes, activation='softmax', name='fc1383')(x)
         model = Model(model_Input.input, outputs=x)
         model.summary()
         return model
     elif modelname == 'DenseNet201':
+        model_Input.trainable = False
         x = model_Input.output
-        x = GlobalAveragePooling2D()(x)
-        x = Activation('softmax')(x)
+        x = GlobalAveragePooling2D(name='avg_pool')(x)  # same as ResNet50
+        x = Dense(config.num_classes, activation='softmax', name='fc1383')(x)  # same as ResNet50
         model = Model(model_Input.input, outputs=x)
         model.summary()
         return model
