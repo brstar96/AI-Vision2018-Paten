@@ -130,45 +130,47 @@ def balancing_process(train_dataset_path,input_shape, num_classes,nb_epoch):
 
     return x_train, y_train
 
-def AddFineTuningLayer(model_Input, modelname):
+def AddFineTuningLayer(basemodel, modelname):
     # include_top = False이면 FCN같은 마지막 레이어 미포함
+    # These classification layer structures are from Keras official github and paper
     if modelname == 'VGG16':
-        model_Input.trainable = False
-        x = model_Input.output
+        basemodel.trainable = False
+        x = basemodel.output
         # Classification block (codes from 'vgg16.py' on keras official github)
         x = Flatten(name='flatten')(x)
         x = Dense(4096, activation='relu', name='fc1')(x)
         x = Dense(4096, activation='relu', name='fc2')(x)
         x = Dense(config.num_classes, activation='softmax', name='predictions')(x)
-        model = Model(model_Input.input, outputs=x)
+        model = Model(basemodel.input, outputs=x)
         model.summary()
         return model
     elif modelname == 'ResNet50':
-        model_Input.trainable = False
-        x = model_Input.output
+        basemodel.trainable = False
+        x = basemodel.output
         x = GlobalAveragePooling2D(name='avg_pool')(x)
         x =Dense(config.num_classes, activation='softmax', name='fc1383')(x)
-        model = Model(model_Input.input, outputs=x)
+        model = Model(basemodel.input, outputs=x)
         model.summary()
         return model
     elif modelname == 'DenseNet201':
-        model_Input.trainable = False
-        x = model_Input.output
+        basemodel.trainable = False
+        x = basemodel.output
         x = GlobalAveragePooling2D(name='avg_pool')(x)  # same as ResNet50
         x = Dense(config.num_classes, activation='softmax', name='fc1383')(x)  # same as ResNet50
-        model = Model(model_Input.input, outputs=x)
+        model = Model(basemodel.input, outputs=x)
         model.summary()
         return model
     else:
         NotImplementedError
 
-def Ensemble(models, model_input):
+def Ensemble(models, model_input_shape):
     # 3개의 모델로부터 나온 softmax 확률값을 평균냄.
     outputs = [model.outputs[0] for model in models]
     merged = Average()(outputs)
-    Finalmodel = Model(model_input, merged, name='ensemble')
+    Finalmodel = Model(model_input_shape, merged, name='ensemble')
     return Finalmodel
 
+# model = Model(basemodel.input, outputs=x)
 def model_Fit(model):
     t0 = time.time()
     for e in range(nb_epoch):
@@ -303,7 +305,7 @@ if __name__ == '__main__':
         FittedModels[modelnum] = model_Fit(models[modelnum])
 
     """ 3 Model ensemble """
-    ensemble_model = Ensemble(FittedModels)
+    ensemble_model = Ensemble(FittedModels, input_shape)  # input_shape = (224, 224, 3)
     bind_model(ensemble_model)
 
     '''
