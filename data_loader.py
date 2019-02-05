@@ -13,11 +13,15 @@ def train_data_balancing(data_path, img_size,fork_epoch, nb_epoch):
     label_list = []
     img_list = []
     label_idx = 0
-
+    fork_epoch = int(fork_epoch)
+    if fork_epoch == 0:
+        fork_epoch = 0
+    else:
+        fork_epoch +=1
     for root, dirs, files in os.walk(data_path):
         if not files:
             continue
-        filenum = (int(fork_epoch)+1+nb_epoch) % len(files) #checkpoint 다음이어서 +1
+        filenum = (fork_epoch+nb_epoch) % len(files) #checkpoint 다음이어서 +1
 
         ''' 이미지 읽어오는 과정'''
         #print("fork_epoch"+fork_epoch+"filenum : "+str(filenum))
