@@ -119,10 +119,10 @@ def get_feature(model, queries, db):
 
     return queries, query_vecs, db, reference_vecs
 
-def balancing_process(train_dataset_path,input_shape, num_classes,nb_epoch):
+def balancing_process(train_dataset_path,input_shape, fork_epoch,nb_epoch):
     img_list = []
     label_list = []
-    img_list, label_list = train_data_balancing(train_dataset_path, input_shape[:2], num_classes,nb_epoch)  # nb_epoch은 0~1382개 뽑히는 리스트가 총 몇 번 iteration 하고 싶은지
+    img_list, label_list = train_data_balancing(train_dataset_path, input_shape[:2], fork_epoch,nb_epoch)  # nb_epoch은 0~1382개 뽑히는 리스트가 총 몇 번 iteration 하고 싶은지
     # print("list"+str(1)+" label : "+str(label_list[1])+", img : "+str(img_list[1])) 뽑힌 리스트의 내용 확인하는 출력문구
 
     x_train = np.asarray(img_list, dtype=np.float32)  # (1383, 224, 224, 3)
@@ -142,7 +142,6 @@ if __name__ == '__main__':
     args.add_argument('--batch_size', type=int, default=64)
     args.add_argument('--num_classes', type=int, default=1383)
     args.add_argument('--lr', type=float, default=0.001)
-
     # DONOTCHANGE: They are reserved for nsml
     args.add_argument('--mode', type=str, default='train', help='submit일때 해당값이 test로 설정됩니다.')
     args.add_argument('--iteration', type=str, default='0',
@@ -156,12 +155,11 @@ if __name__ == '__main__':
     num_classes = config.num_classes
     input_shape = (224, 224, 3)  # input image shape
     lr = config.lr
-    st_epoch = config.iteration #fork할 때, balancing count 받아오기 위해서 iteration = start epoch
-
+    st_epoch = config.iteration  # fork할 때, balancing count 받아오기 위해서 iteration = start epoch
     """ Model """
     #model = DenseNet201(input_shape=input_shape, weights=None, include_top = True, classes = num_classes)
     model = NASNetMobile(input_shape=input_shape, weights=None, include_top = True, classes = num_classes)
-    #model = multi_gpu_model(model, gpus=2)
+
     model.summary()
 
 
@@ -173,13 +171,13 @@ if __name__ == '__main__':
     bTrainmode = False
     if config.mode == 'train':
         bTrainmode = True
+        # model = multi_gpu_model(model, gpus=2)
+        #nsml.load(checkpoint=151, session='team_33/ir_ph2/141')           # load시 수정 필수!
 
-        nsml.load(checkpoint=359, session='team_33/ir_ph2/171')           # load시 수정 필수!
-        nsml.save(359)
 
         """ Initiate RMSprop optimizer """
-        #opt = keras.optimizers.rmsprop(lr=lr, decay=1e-6)
-        opt = keras.optimizers.SGD(lr=lr, momentum=0.9, nesterov=True, decay= 1e-5)
+        opt = keras.optimizers.rmsprop(lr=0.00025, decay=1e-6)
+        #opt = keras.optimizers.SGD(lr=0.001, momentum=0.9, nesterov=True, decay= 1e-5)
         model.compile(loss='categorical_crossentropy',
                       optimizer=opt,
                       metrics=['accuracy'])
@@ -230,7 +228,7 @@ if __name__ == '__main__':
             print('Epochs : ', e)
             #batches = 0
             '''epoch에 맞게 x_rain,y_train가져오기 '''
-            x_train, y_train = balancing_process(train_dataset_path, input_shape, num_classes, e)
+            x_train, y_train = balancing_process(train_dataset_path, input_shape, st_epoch, e)
             #model.evaluate(x_train, y_train, batch_size=batch_size,verbose=1)
             #print(x_train.shape)
 
@@ -256,7 +254,7 @@ if __name__ == '__main__':
             train_loss, train_acc = res.history['loss'][0], res.history['acc'][0]
             #val_loss, val_acc = res.history['val_loss'][0], res.history['val_acc'][0]
             nsml.report(summary=True, epoch=e, epoch_total=nb_epoch, loss=train_loss, acc=train_acc)#, val_loss=val_loss, val_acc=val_acc)
-            if (e+1) % 40 == 0:
+            if (e+1) % 2 == 0:
                 nsml.save(e)
                 print('checkpoint name : ' + str(e))
             # 메모리 해제
