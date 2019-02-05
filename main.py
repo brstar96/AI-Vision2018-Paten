@@ -13,7 +13,7 @@ import numpy as np
 from nsml import DATASET_PATH
 import keras
 from keras.models import Sequential, Model, Input
-from keras.layers import Dense, Dropout, Flatten, Activation, GlobalAveragePooling2D
+from keras.layers import Dense, Dropout, Flatten, Activation, GlobalAveragePooling2D, Average
 from keras.layers import Conv2D, MaxPooling2D
 from keras.callbacks import ReduceLROnPlateau, LearningRateScheduler
 from keras.preprocessing.image import ImageDataGenerator
@@ -133,6 +133,65 @@ def balancing_process(train_dataset_path,input_shape, num_classes,nb_epoch):
 
     return x_train, y_train
 
+def AddFineTuningLayer(model_Input):
+    # include_top = False이면 FCN레이어 미포함
+    model_Input.trainable = False
+    x = model_Input.output
+    x = GlobalAveragePooling2D()(x)
+    x = Activation('softmax')(x)
+    model = Model(model_Input.input, outputs=x)
+
+    model.summary()
+    bind_model(model)
+    return model
+
+def Ensemble(models, model_input):
+    outputs = [model.outputs[0] for model in models]
+    y = Average()(outputs)
+    Finalmodel = Model(model_input, y, name='ensemble')
+    return Finalmodel
+
+def model_Fit(model):
+    t0 = time.time()
+    for e in range(nb_epoch):
+        t1 = time.time()
+        print('Epochs : ', e)
+        #batches = 0
+        '''epoch에 맞게 x_rain,y_train가져오기 '''
+        x_train, y_train = balancing_process(train_dataset_path, input_shape, num_classes, e)
+        #model.evaluate(x_train, y_train, batch_size=batch_size,verbose=1)
+        #print(x_train.shape)
+
+        train_generator = train_datagen.flow(
+            x_train, y_train,
+            batch_size=batch_size,
+            shuffle=True,
+        )
+
+        STEP_SIZE_TRAIN = train_generator.n // train_generator.batch_size
+        res = model.fit_generator(generator=train_generator,
+                                   steps_per_epoch=STEP_SIZE_TRAIN,
+                                   initial_epoch=e,
+                                   epochs=e + 1,
+                                   callbacks=[reduce_lr],
+                                   verbose=1,
+                                   shuffle=True,
+                                   )
+        t2 = time.time()
+        print(res.history)
+        print('Training time for one epoch : %.1f' % ((t2 - t1)))
+        train_loss, train_acc = res.history['loss'][0], res.history['acc'][0]
+        #val_loss, val_acc = res.history['val_loss'][0], res.history['val_acc'][0]
+        nsml.report(summary=True, epoch=e, epoch_total=nb_epoch, loss=train_loss, acc=train_acc)#, val_loss=val_loss, val_acc=val_acc)
+        if (e+1) % 40 == 0:
+            nsml.save(e)
+            print('checkpoint name : ' + str(e))
+        # 메모리 해제
+        del x_train
+        del y_train
+        gc.collect()
+    print('Total training time : %.1f' % (time.time() - t0))
+    return res
 
 if __name__ == '__main__':
     args = argparse.ArgumentParser()
@@ -159,26 +218,16 @@ if __name__ == '__main__':
     input_shape = (224, 224, 3)  # input image shape
     lr = config.lr
 
-    """ Model """
+    """ Base Models """
     base_model1 = VGG16(input_shape=input_shape, weights='imagenet', include_top=False, classes=num_classes)
     base_model2 = ResNet50(input_shape=input_shape, weights='imagenet', include_top=False, classes=num_classes)
     base_model3 = DenseNet201(input_shape=input_shape, weights='imagenet', include_top=False, classes=num_classes)
 
-    def AddFineTuningLayer(model_Input):
-        # include_top = False이면 FCN레이어 미포함
-        model_Input.trainable = False
-        x = model_Input.output
-        x = GlobalAveragePooling2D()(x)
-        x = Activation('softmax')(x)
-        model = Model(model_Input.input, outputs=x)
-
-        model.summary()
-        bind_model(model)
-        return model
-
+    """ Add Finetuning Layers"""
     model1 = AddFineTuningLayer(base_model1)
     model2 = AddFineTuningLayer(base_model2)
     model3 = AddFineTuningLayer(base_model3)
+    models = [model1, model2, model3]
 
     if config.pause:
         nsml.paused(scope=locals())
@@ -192,19 +241,13 @@ if __name__ == '__main__':
         """ Initiate RMSprop optimizer """
         opt = keras.optimizers.rmsprop(lr=lr, decay=1e-5)
         # opt = keras.optimizers.SGD(lr=lr, momentum=0.9, nesterov=True, decay= 1e-5)
-        model1.compile(loss='categorical_crossentropy',
-                       optimizer=opt,
-                       metrics=['accuracy'])
-        train_dataset_path = DATASET_PATH + '/train/train_data'
 
-        model2.compile(loss='categorical_crossentropy',
-                       optimizer=opt,
-                       metrics=['accuracy'])
-        train_dataset_path = DATASET_PATH + '/train/train_data'
+        """ Compile 3 Models """
+        for modelnum in models:
+            models[modelnum].compile(loss='categorical_crossentropy',
+                   optimizer=opt,
+                   metrics=['accuracy'])
 
-        model3.compile(loss='categorical_crossentropy',
-                       optimizer=opt,
-                       metrics=['accuracy'])
         train_dataset_path = DATASET_PATH + '/train/train_data'
 
         # img_list,label_list = train_data_balancing(train_dataset_path, input_shape[:2],  num_classes, nb_epoch) #nb_epoch은 0~1382개 뽑히는 리스트가 총 몇 번 iteration 하고 싶은지
@@ -236,52 +279,12 @@ if __name__ == '__main__':
         monitor = 'acc'
         reduce_lr = ReduceLROnPlateau(monitor=monitor, patience=2, verbose=1)
 
-    def model_Fit(model):
-        t0 = time.time()
-        for e in range(nb_epoch):
-            t1 = time.time()
-            print('Epochs : ', e)
-            #batches = 0
-            '''epoch에 맞게 x_rain,y_train가져오기 '''
-            x_train, y_train = balancing_process(train_dataset_path, input_shape, num_classes, e)
-            #model.evaluate(x_train, y_train, batch_size=batch_size,verbose=1)
-            #print(x_train.shape)
-
-            train_generator = train_datagen.flow(
-                x_train, y_train,
-                batch_size=batch_size,
-                shuffle=True,
-            )
-
-            STEP_SIZE_TRAIN = train_generator.n // train_generator.batch_size
-            res = model.fit_generator(generator=train_generator,
-                                       steps_per_epoch=STEP_SIZE_TRAIN,
-                                       initial_epoch=e,
-                                       epochs=e + 1,
-                                       callbacks=[reduce_lr],
-                                       verbose=1,
-                                       shuffle=True,
-                                       )
-            t2 = time.time()
-            print(res.history)
-            print('Training time for one epoch : %.1f' % ((t2 - t1)))
-            train_loss, train_acc = res.history['loss'][0], res.history['acc'][0]
-            #val_loss, val_acc = res.history['val_loss'][0], res.history['val_acc'][0]
-            nsml.report(summary=True, epoch=e, epoch_total=nb_epoch, loss=train_loss, acc=train_acc)#, val_loss=val_loss, val_acc=val_acc)
-            if (e+1) % 40 == 0:
-                nsml.save(e)
-                print('checkpoint name : ' + str(e))
-            # 메모리 해제
-            del x_train
-            del y_train
-            gc.collect()
-        print('Total training time : %.1f' % (time.time() - t0))
-        return history
-
     """ Model Fit, Training Loop, Checkpoint save """
-    model_Fit(model1)
-    model_Fit(model2)
-    model_Fit(model3)
+    for modelnum in models:
+        model_Fit(models[modelnum])
+
+    """ 3 Model ensemble """
+    ensemble_model = Ensemble(models)
 
     '''
         for x_batch, y_batch in train_datagen.flow(x_train, y_train, batch_size=batch_size):

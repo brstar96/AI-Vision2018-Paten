@@ -10,24 +10,24 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/main.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="732">
+              <caret line="283" column="35" lean-forward="true" selection-start-line="283" selection-start-column="35" selection-end-line="283" selection-end-column="35" />
+              <folding>
+                <element signature="e#24#62#0" expanded="true" />
+                <element signature="e#10668#11803#1" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
       <file pinned="false" current-in-tab="false">
         <entry file="file://C:/Python3_5/Lib/site-packages/keras/engine/training.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="150">
               <caret line="32" column="6" selection-start-line="32" selection-start-column="6" selection-end-line="32" selection-end-column="6" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/main.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="203">
-              <caret line="177" lean-forward="true" selection-start-line="177" selection-end-line="177" />
-              <folding>
-                <element signature="e#24#62#0" expanded="true" />
-                <element signature="e#10325#11556#1" />
-              </folding>
             </state>
           </provider>
         </entry>
@@ -80,6 +80,8 @@
       <find>train_data_balancing</find>
       <find>balancing_process</find>
       <find>bind_model</find>
+      <find>AddFineTuningLayer</find>
+      <find>Model</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -94,7 +96,7 @@
   </component>
   <component name="ProjectFrameBounds">
     <option name="x" value="1083" />
-    <option name="width" value="1621" />
+    <option name="width" value="1616" />
     <option name="height" value="1087" />
   </component>
   <component name="ProjectView">
@@ -146,10 +148,10 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="1083" y="0" width="1621" height="1087" extended-state="0" />
+    <frame x="1083" y="0" width="1616" height="1087" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.1857233" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.18631178" />
       <window_info id="Structure" order="1" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -204,11 +206,11 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/main.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="203">
-          <caret line="177" lean-forward="true" selection-start-line="177" selection-end-line="177" />
+        <state relative-caret-position="732">
+          <caret line="283" column="35" lean-forward="true" selection-start-line="283" selection-start-column="35" selection-end-line="283" selection-end-column="35" />
           <folding>
             <element signature="e#24#62#0" expanded="true" />
-            <element signature="e#10325#11556#1" />
+            <element signature="e#10668#11803#1" />
           </folding>
         </state>
       </provider>
