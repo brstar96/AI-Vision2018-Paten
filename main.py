@@ -170,12 +170,20 @@ def AddFineTuningLayer(basemodel, modelname):
 
 def Ensemble(model1, model2, model3, model_input_shape):
     # 3개의 모델로부터 나온 softmax 확률값을 평균냄.
-    outputs = [model1.outputs, model2.outputs, model3.outputs]
+    # model.layers[0]
+    outputs = [model1.layers[0], model2.layers[0], model3.layers[0]]
     print('type of model1.outputs : ')
-    print(type(model1.outputs))
+    print(type(model1.layers[0]))
+    print('type of outputs[0] : ')
+    print(type(outputs[0]))
     merged = Average()(outputs)
+    print('type of merged : ')
+    print(type(merged))
+
     Finalmodel = Model(model_input_shape, merged, name='ensemble')
     bind_model(Finalmodel)
+    print('type of Finalmodel : ')
+    print(type(Finalmodel))
     return Finalmodel
 
 def model_Fit(model, Modelname):
@@ -212,7 +220,7 @@ def model_Fit(model, Modelname):
         if nb_epoch == 1:
             if Modelname == 'VGG16':
                 checkpointname = Modelname + "_MGL_0206_" + str(nb_epoch)
-                model.save_weights(checkpointname + '.h5')
+                nsml.save(checkpoint=checkpointname)
                 print('checkpoint name : ' + checkpointname)
                 # nsml.save(checkpoint = checkpointname)
             elif Modelname == 'ResNet50':
@@ -278,7 +286,19 @@ if __name__ == '__main__':
     print('infer init')
     if config.pause:
         print('config.pause activated')
+        # model 3개를 로드한 후 ensemble함수 호출
+        nsml.load(checkpoint='VGG16_MGL_0206_1', session='team_33/ir_ph2/(이전세션번호)')  # load시 수정 필수!
+        nsml.load(checkpoint='ResNet50_MGL_0206_1', session='team_33/ir_ph2/(이전세션번호)')  # load시 수정 필수!
+        nsml.load(checkpoint='DenseNet201_MGL_0206_1', session='team_33/ir_ph2/(이전세션번호)')  # load시 수정 필수!
+
+        """ 3 Model ensemble """
+        ensemble_model = Ensemble(FineTunedVgg16[0], FineTunedResNet50[0], FineTunedDenseNet201[0],
+                                  input_shape)  # input_shape = (224, 224, 3)
+
         nsml.paused(scope=locals())
+
+
+
 
 
     bTrainmode = False
@@ -321,12 +341,12 @@ if __name__ == '__main__':
         monitor = 'acc'
         reduce_lr = ReduceLROnPlateau(monitor=monitor, patience=2, verbose=1)
 
-    """ Model Fit, Training Loop, Checkpoint save """
-    FineTunedVgg16 = model_Fit(FineTunedVgg16, EnsembledModelname[0])
-    print('type of Fitted FineTunedVgg16[0] : ') # 0번은 fit된 모델의 리턴값
-    print(type(FineTunedVgg16[0])) # <class 'keras.engine.training.Model'>
-    FineTunedResNet50 = model_Fit(FineTunedResNet50, EnsembledModelname[1])
-    FineTunedDenseNet201 = model_Fit(FineTunedDenseNet201, EnsembledModelname[2])
+        """ Model Fit, Training Loop, Checkpoint save """
+        FineTunedVgg16 = model_Fit(FineTunedVgg16, EnsembledModelname[0])
+        print('type of Fitted FineTunedVgg16[0] : ') # 0번은 fit된 모델의 리턴값
+        print(type(FineTunedVgg16[0])) # <class 'keras.engine.training.Model'>
+        FineTunedResNet50 = model_Fit(FineTunedResNet50, EnsembledModelname[1])
+        FineTunedDenseNet201 = model_Fit(FineTunedDenseNet201, EnsembledModelname[2])
 
     # TrainedModels = [FineTunedVgg16, FineTunedResNet50, FineTunedDenseNet201]
 
@@ -338,5 +358,3 @@ if __name__ == '__main__':
     # TrainedResNet50 = FineTunedResNet50[0].load_weights('ResNet50_MGL_0206_1.hdf5')
     # TrainedDenseNet201 = FineTunedDenseNet201[0].load_weights('DenseNet201_MGL_0206_1.hdf5')
 
-    """ 3 Model ensemble """
-    ensemble_model = Ensemble(FineTunedVgg16[0], FineTunedResNet50[0],FineTunedDenseNet201[0], input_shape)  # input_shape = (224, 224, 3)
