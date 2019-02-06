@@ -14,6 +14,7 @@ import h5py
 from nsml import DATASET_PATH
 import keras
 from keras.callbacks import History
+from keras import Input, layers
 from keras.models import Model, Input, load_model
 from keras.layers import Dense, Dropout, Flatten, Activation, GlobalAveragePooling2D, Average
 from keras.layers import Conv2D, MaxPooling2D
@@ -30,6 +31,31 @@ from keras.utils.training_utils import multi_gpu_model
 import gc
 
 np.set_printoptions(threshold=np.nan)
+
+def Ensemble(TrainedModels, model_input):
+    # 3개의 모델로부터 나온 softmax 확률값을 평균냄.
+    # collect outputs of models in a list
+    yModels = [model(model_input) for model in TrainedModels]
+    # outputs = [model.outputs[0] for model in TrainedModels]
+
+    # averaging outputs
+    merged = layers.average(yModels)
+    print('type of merged : ')
+    print(type(merged))
+
+    # build model from same input and avg output
+    Finalmodel = Model(inputs = model_input, outputs = merged, name='ensemble')
+    bind_model(Finalmodel)
+    Finalmodel.summary()
+    print('type of Finalmodel : ')
+    print(type(Finalmodel))
+
+    checkpointname = "En_MGL_0207_" + str(nb_epoch)
+    nsml.save(checkpoint=checkpointname)
+    print('Checkpoint Saved! : ' + checkpointname)
+
+    return Finalmodel
+
 def bind_model(model):
     def save(dir_name):
         os.makedirs(dir_name, exist_ok=True)
@@ -132,57 +158,44 @@ def balancing_process(train_dataset_path,input_shape, num_classes,nb_epoch):
 
     return x_train, y_train
 
-def AddFineTuningLayer(basemodel, modelname):
+def AddFineTuningLayer(basemodel, model_input, modelname):
     # include_top = False이면 FCN같은 마지막 레이어 미포함
     # These classification layer structures are from Keras official github and paper
     if modelname == 'InceptionV3':
         basemodel.trainable = False
         x = basemodel.output
         # Classification block (codes from 'inception_v3.py' on keras official github)
+        # avg_pool (GlobalAveragePooling2 (None, 2048) 0 activation_143[0][0]
         x = GlobalAveragePooling2D(name='avg_pool')(x)
         x = Dense(config.num_classes, activation='softmax', name='fc1383')(x)
-        model = Model(basemodel.input, outputs=x, name = 'InceptionV3')
+        model = Model(inputs = basemodel.input, outputs = x, name = 'InceptionV3')
         bind_model(model)
         model.summary()
         return model
     elif modelname == 'ResNet50':
         basemodel.trainable = False
         x = basemodel.output
+        # avg_pool (GlobalAveragePooling2 (None, 2048) 0 activation_143[0][0]
         x = GlobalAveragePooling2D(name='avg_pool')(x)
-        x =Dense(config.num_classes, activation='softmax', name='fc1383')(x)
-        model = Model(basemodel.input, outputs=x, name = 'ResNet50')
+        x = Dense(config.num_classes, activation='softmax', name='fc1383')(x)
+        model = Model(inputs = basemodel.input, outputs = x, name = 'ResNet50')
         bind_model(model)
         model.summary()
         return model
     elif modelname == 'DenseNet201':
         basemodel.trainable = False
         x = basemodel.output
+        # avg_pool (GlobalAveragePooling2 (None, 1920) 0 relu[0][0]
         x = GlobalAveragePooling2D(name='avg_pool')(x)  # same as ResNet50
         x = Dense(config.num_classes, activation='softmax', name='fc1383')(x)  # same as ResNet50
-        model = Model(basemodel.input, outputs=x, name = 'DenseNet201')
+        model = Model(input = basemodel.input, outputs = x, name = 'DenseNet201')
         bind_model(model)
         model.summary()
         return model
     else:
         NotImplementedError
 
-def Ensemble(model1, model2, model3, model_input_shape):
-    # 3개의 모델로부터 나온 softmax 확률값을 평균냄.
-    # model.layers[0]
-    outputs = [model1.layers[0], model2.layers[0], model3.layers[0]]
-    print('type of model1.outputs : ')
-    print(type(model1.layers[0]))
-    print('type of outputs[0] : ')
-    print(type(outputs[0]))
-    merged = Average()(outputs)
-    print('type of merged : ')
-    print(type(merged))
 
-    Finalmodel = Model(model_input_shape, merged, name='ensemble')
-    bind_model(Finalmodel)
-    print('type of Finalmodel : ')
-    print(type(Finalmodel))
-    return Finalmodel
 
 def model_Fit(model, Modelname):
     t0 = time.time()
@@ -216,19 +229,20 @@ def model_Fit(model, Modelname):
         #val_loss, val_acc = res.history['val_loss'][0], res.history['val_acc'][0]
         nsml.report(summary=True, epoch=e, epoch_total=nb_epoch, loss=train_loss, acc=train_acc)#, val_loss=val_loss, val_acc=val_acc)
         if nb_epoch == 1:
-            if Modelname == 'VGG16':
-                checkpointname = Modelname + "_MGL_0206_" + str(nb_epoch)
-                nsml.save(checkpoint=checkpointname)
-                print('checkpoint name : ' + checkpointname)
-                # nsml.save(checkpoint = checkpointname)
+            if Modelname == 'InceptionV3':
+                print('Model generated : ' + Modelname + "_" + str(nb_epoch))
+                # nsml.save(checkpoint=checkpointname)
+                # print('checkpoint name : ' + checkpointname)
             elif Modelname == 'ResNet50':
-                checkpointname = Modelname + "_MGL_0206_" + str(nb_epoch)
-                print('checkpoint name : ' + checkpointname)
-                nsml.save(checkpoint=checkpointname)
+                print('Model generated : ' + Modelname + "_" + str(nb_epoch))
+                # checkpointname = Modelname + "_MGL_0206_" + str(nb_epoch)
+                # print('checkpoint name : ' + checkpointname)
+                # nsml.save(checkpoint=checkpointname)
             elif Modelname == 'DenseNet201':
-                checkpointname = Modelname + "_MGL_0206_" + str(nb_epoch)
-                print('checkpoint name : ' + checkpointname)
-                nsml.save(checkpoint=checkpointname)
+                print('Model generated : ' + Modelname + "_" + str(nb_epoch))
+                # checkpointname = Modelname + "_MGL_0206_" + str(nb_epoch)
+                # print('checkpoint name : ' + checkpointname)
+                # nsml.save(checkpoint=checkpointname)
             else:
                 NotImplementedError
         # if (e+1) % 40 == 0:
@@ -239,7 +253,7 @@ def model_Fit(model, Modelname):
         del y_train
         gc.collect()
     print('Total training time : %.1f' % (time.time() - t0))
-    return model, checkpointname, res
+    return model, res
 
 if __name__ == '__main__':
     args = argparse.ArgumentParser()
@@ -264,36 +278,23 @@ if __name__ == '__main__':
     batch_size = config.batch_size
     num_classes = config.num_classes
     input_shape = (224, 224, 3)  # input image shape
+    print('type of model_input : ')
+    print(type(model_input))
     lr = config.lr
     EnsembledModelname = ['InceptionV3', 'ResNet50', 'DenseNet201']
 
     """ Base Models """
-    base_model1 = inception_v3(input_shape=input_shape, weights=None, include_top=False, classes=1000)
-    base_model2 = ResNet50(input_shape=input_shape, weights=None, include_top=False, classes=1000)
-    base_model3 = DenseNet201(input_shape=input_shape, weights=None, include_top=False, classes=1000)
-    print('type of base_model1 : ')
-    print(type(base_model1)) # <class 'keras.engine.training.Model'>
+    base_model1 = InceptionV3(input_shape = input_shape, weights=None, include_top=False, classes=1000) # base_model1 : <class 'keras.engine.training.Model'>
+    base_model2 = ResNet50(input_shape = input_shape, weights=None, include_top=False, classes=1000)
+    base_model3 = DenseNet201(input_shape = input_shape, weights=None, include_top=False, classes=1000)
 
     """ Add Finetuning Layers and bind to model """
-    FineTunedInceptionV3 = AddFineTuningLayer(base_model1, EnsembledModelname[0])
-    FineTunedResNet50 = AddFineTuningLayer(base_model2, EnsembledModelname[1])
-    FineTunedDenseNet201 = AddFineTuningLayer(base_model3, EnsembledModelname[2])
-    print('type of FineTunedInceptionV3 : ')
-    print(type(FineTunedInceptionV3)) # <class 'keras.engine.training.Model'>
+    FineTunedInceptionV3 = AddFineTuningLayer(base_model1, model_input, EnsembledModelname[0]) # FineTunedInceptionV3 : <class 'keras.engine.training.Model'>
+    FineTunedResNet50 = AddFineTuningLayer(base_model2, model_input, EnsembledModelname[1])
+    FineTunedDenseNet201 = AddFineTuningLayer(base_model3, model_input, EnsembledModelname[2])
 
     print('infer init')
     if config.pause:
-        print('config.pause activated')
-        # model 3개를 로드한 후 ensemble함수 호출
-        nsml.load(checkpoint='InceptionV3_MGL_0206_1', session='team_33/ir_ph2/(이전세션번호)')  # load시 수정 필수!
-        nsml.load(checkpoint='ResNet50_MGL_0206_1', session='team_33/ir_ph2/(이전세션번호)')  # load시 수정 필수!
-        nsml.load(checkpoint='DenseNet201_MGL_0206_1', session='team_33/ir_ph2/(이전세션번호)')  # load시 수정 필수!
-
-        """ 3 Model ensemble """
-        ensemble_model = Ensemble(FineTunedInceptionV3[0],
-                                  FineTunedResNet50[0],
-                                  FineTunedDenseNet201[0],
-                                  input_shape)  # input_shape = (224, 224, 3)
         nsml.paused(scope=locals())
 
     bTrainmode = False
@@ -307,11 +308,9 @@ if __name__ == '__main__':
         # opt = keras.optimizers.SGD(lr=lr, momentum=0.9, nesterov=True, decay= 1e-5)
 
         """ Compile 3 Models """
-        FineTunedInceptionV3.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
+        FineTunedInceptionV3.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy']) # <class 'keras.engine.training.Model'>
         FineTunedResNet50.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
         FineTunedDenseNet201.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
-        print('type of compiled FineTunedVgg16 : ')
-        print(type(FineTunedInceptionV3)) # <class 'keras.engine.training.Model'>
 
         train_dataset_path = DATASET_PATH + '/train/train_data'
         train_datagen = ImageDataGenerator(
@@ -338,18 +337,12 @@ if __name__ == '__main__':
 
         """ Model Fit, Training Loop, Checkpoint save """
         FineTunedInceptionV3 = model_Fit(FineTunedInceptionV3, EnsembledModelname[0])
-        print('type of Fitted FineTunedInceptionV3[0] : ') # 0번은 fit된 모델의 리턴값
-        print(type(FineTunedInceptionV3[0])) # <class 'keras.engine.training.Model'>
         FineTunedResNet50 = model_Fit(FineTunedResNet50, EnsembledModelname[1])
         FineTunedDenseNet201 = model_Fit(FineTunedDenseNet201, EnsembledModelname[2])
+        TrainedModels = [FineTunedInceptionV3[0], FineTunedResNet50[0], FineTunedDenseNet201[0]] # FineTunedInceptionV3[0] : <class 'keras.engine.training.Model'>
+        model_input = Input(shape=TrainedModels[0].input_shape, name='image_input')
+        print(type(model_input))
+        print(model_input)
+        # model_input = Input(shape=TrainedModels[0].input_shape[:3], name='image_input')
 
-    # TrainedModels = [FineTunedVgg16, FineTunedResNet50, FineTunedDenseNet201]
-
-    # Fit된 .h5py파일의 weights를 load
-    # with open(FineTunedVgg16[1], 'r') as f:
-    #     TrainedVGG16 = FineTunedVgg16[0].load_weights('VGG16_MGL_0206_1.h5')
-    # print('type of TrainedVGG16[0] : ')
-    # print(type(TrainedVGG16))
-    # TrainedResNet50 = FineTunedResNet50[0].load_weights('ResNet50_MGL_0206_1.hdf5')
-    # TrainedDenseNet201 = FineTunedDenseNet201[0].load_weights('DenseNet201_MGL_0206_1.hdf5')
-
+        Ensemble(TrainedModels, model_input)

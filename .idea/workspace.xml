@@ -15,8 +15,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="370">
-              <caret line="341" column="84" lean-forward="true" selection-start-line="341" selection-start-column="84" selection-end-line="341" selection-end-column="84" />
+            <state relative-caret-position="-7069">
+              <caret line="34" column="4" selection-start-line="34" selection-start-column="4" selection-end-line="34" selection-end-column="4" />
               <folding>
                 <element signature="e#24#62#0" expanded="true" />
               </folding>
@@ -24,21 +24,27 @@
           </provider>
         </entry>
       </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://C:/Python3_5/Lib/site-packages/keras/applications/inception_v3.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="120">
+              <caret line="9" column="4" selection-start-line="9" selection-start-column="4" selection-end-line="9" selection-end-column="4" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://C:/Python3_5/Lib/site-packages/keras_applications/inception_v3.py">
+          <provider selected="true" editor-type-id="text-editor" />
+        </entry>
+      </file>
     </leaf>
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>data_loader</find>
-      <find>train_data_loader</find>
-      <find>train_data_balancing</find>
-      <find>balancing_process</find>
-      <find>Model</find>
-      <find>batch</find>
-      <find>get_feature</find>
       <find>bind_model</find>
       <find>model_Fit</find>
       <find>include_top</find>
-      <find>bind</find>
       <find>for</find>
       <find>epoch</find>
       <find>history</find>
@@ -52,12 +58,20 @@
       <find>fit</find>
       <find>fitted</find>
       <find>load_weight</find>
-      <find>ensemble</find>
       <find>infer</find>
       <find>save</find>
-      <find>pause</find>
       <find>VGG16_MGL_0206_1</find>
       <find>type of</find>
+      <find>base</find>
+      <find>vgg16</find>
+      <find>pause</find>
+      <find>nsml.load</find>
+      <find>ensemble</find>
+      <find>bind</find>
+      <find>finetuned</find>
+      <find>input_shape</find>
+      <find>basemodel</find>
+      <find>model_input</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -71,8 +85,8 @@
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="1215" />
-    <option name="width" value="1876" />
+    <option name="x" value="890" />
+    <option name="width" value="1450" />
     <option name="height" value="1087" />
   </component>
   <component name="ProjectView">
@@ -124,10 +138,10 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="1215" y="0" width="1876" height="1087" extended-state="0" />
+    <frame x="890" y="0" width="1450" height="1087" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.07181719" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.09348442" />
       <window_info id="Structure" order="1" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -164,10 +178,20 @@
     <entry file="file://C:/Python3_5/Lib/site-packages/keras/engine/training.py" />
     <entry file="file://C:/Python352/Lib/site-packages/keras/layers/merge.py" />
     <entry file="file://C:/Python352/Lib/site-packages/keras/engine/training.py" />
+    <entry file="file://C:/Python3_5/Lib/site-packages/keras_applications/inception_v3.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://C:/Python3_5/Lib/site-packages/keras/applications/inception_v3.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="120">
+          <caret line="9" column="4" selection-start-line="9" selection-start-column="4" selection-end-line="9" selection-end-column="4" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/main.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="370">
-          <caret line="341" column="84" lean-forward="true" selection-start-line="341" selection-start-column="84" selection-end-line="341" selection-end-column="84" />
+        <state relative-caret-position="-7069">
+          <caret line="34" column="4" selection-start-line="34" selection-start-column="4" selection-end-line="34" selection-end-column="4" />
           <folding>
             <element signature="e#24#62#0" expanded="true" />
           </folding>
