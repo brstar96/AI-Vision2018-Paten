@@ -142,7 +142,8 @@ def AddFineTuningLayer(basemodel, modelname):
         x = Dense(4096, activation='relu', name='fc1')(x)
         x = Dense(4096, activation='relu', name='fc2')(x)
         x = Dense(config.num_classes, activation='softmax', name='predictions')(x)
-        model = Model(basemodel.input, outputs=x)
+        model = Model(basemodel.input, outputs=x, name = 'VGG16')
+        bind_model(model)
         model.summary()
         return model
     elif modelname == 'ResNet50':
@@ -150,7 +151,8 @@ def AddFineTuningLayer(basemodel, modelname):
         x = basemodel.output
         x = GlobalAveragePooling2D(name='avg_pool')(x)
         x =Dense(config.num_classes, activation='softmax', name='fc1383')(x)
-        model = Model(basemodel.input, outputs=x)
+        model = Model(basemodel.input, outputs=x, name = 'ResNet50')
+        bind_model(model)
         model.summary()
         return model
     elif modelname == 'DenseNet201':
@@ -158,32 +160,26 @@ def AddFineTuningLayer(basemodel, modelname):
         x = basemodel.output
         x = GlobalAveragePooling2D(name='avg_pool')(x)  # same as ResNet50
         x = Dense(config.num_classes, activation='softmax', name='fc1383')(x)  # same as ResNet50
-        model = Model(basemodel.input, outputs=x)
+        model = Model(basemodel.input, outputs=x, name = 'DenseNet201')
+        bind_model(model)
         model.summary()
         return model
     else:
         NotImplementedError
 
-def Ensemble(models, model_input_shape):
-    # Fit된 .hdf5파일의 weights를 load
-    TrainedVGG = models[0].load_weights(models[0].checkpointname + '.hdf5')
-    TrainedResNet = models[1].load_weights(models[1].checkpointname + '.hdf5')
-    TrainedDenseNet = models[2].load_weights(models[2].checkpointname + '.hdf5')
-    TrainedModels = [TrainedVGG, TrainedResNet, TrainedDenseNet]
-
+def Ensemble(model1, model2, model3, model_input_shape):
     # 3개의 모델로부터 나온 softmax 확률값을 평균냄.
-    outputs = [model.outputs[0] for model in TrainedModels]
+    outputs = [model1.outputs, model2.outputs, model3.outputs]
     merged = Average()(outputs)
     Finalmodel = Model(model_input_shape, merged, name='ensemble')
+    bind_model(Finalmodel)
     return Finalmodel
 
-# model = Model(basemodel.input, outputs=x)
 def model_Fit(model, Modelname):
     t0 = time.time()
     for e in range(nb_epoch):
         t1 = time.time()
         print('Epochs : ', e)
-        #batches = 0
         '''epoch에 맞게 x_rain,y_train가져오기 '''
         x_train, y_train = balancing_process(train_dataset_path, input_shape, num_classes, e)
         #model.evaluate(x_train, y_train, batch_size=batch_size,verbose=1)
@@ -233,7 +229,7 @@ def model_Fit(model, Modelname):
         del y_train
         gc.collect()
     print('Total training time : %.1f' % (time.time() - t0))
-    return model, checkpointname
+    return model, res
 
 if __name__ == '__main__':
     args = argparse.ArgumentParser()
@@ -266,11 +262,10 @@ if __name__ == '__main__':
     base_model2 = ResNet50(input_shape=input_shape, weights=None, include_top=False, classes=num_classes)
     base_model3 = DenseNet201(input_shape=input_shape, weights=None, include_top=False, classes=num_classes)
 
-    """ Add Finetuning Layers"""
-    model1 = AddFineTuningLayer(base_model1, EnsembledModelname[0])
-    model2 = AddFineTuningLayer(base_model2, EnsembledModelname[1])
-    model3 = AddFineTuningLayer(base_model3, EnsembledModelname[2])
-    models = [model1, model2, model3]
+    """ Add Finetuning Layers and bind to model """
+    FineTunedVgg16 = AddFineTuningLayer(base_model1, EnsembledModelname[0])
+    FineTunedResNet50 = AddFineTuningLayer(base_model2, EnsembledModelname[1])
+    FineTunedDenseNet201 = AddFineTuningLayer(base_model3, EnsembledModelname[2])
 
     if config.pause:
         nsml.paused(scope=locals())
@@ -286,19 +281,11 @@ if __name__ == '__main__':
         # opt = keras.optimizers.SGD(lr=lr, momentum=0.9, nesterov=True, decay= 1e-5)
 
         """ Compile 3 Models """
-        model1.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
-        model2.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
-        model3.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
+        FineTunedVgg16.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
+        FineTunedResNet50.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
+        FineTunedDenseNet201.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
 
         train_dataset_path = DATASET_PATH + '/train/train_data'
-
-        # img_list,label_list = train_data_balancing(train_dataset_path, input_shape[:2],  num_classes, nb_epoch) #nb_epoch은 0~1382개 뽑히는 리스트가 총 몇 번 iteration 하고 싶은지
-        # print("list"+str(1)+" label : "+str(label_list[1])+", img : "+str(img_list[1])) 뽑힌 리스트의 내용 확인하는 출력문구
-        # x_train = np.asarray(img_list) #(1383, 224, 224, 3)
-        # labels = np.asarray(label_list) #(1383,)
-        # y_train = keras.utils.to_categorical(labels, num_classes=num_classes)  #(1383, 1383)
-        # x_train = x_train.astype('float32')
-
         train_datagen = ImageDataGenerator(
             rescale=1. / 255,
             rotation_range=180,
@@ -322,39 +309,16 @@ if __name__ == '__main__':
         reduce_lr = ReduceLROnPlateau(monitor=monitor, patience=2, verbose=1)
 
     """ Model Fit, Training Loop, Checkpoint save """
-    FittedModels = [model_Fit(models[0], EnsembledModelname[0]),
-                    model_Fit(models[1], EnsembledModelname[1]),
-                    model_Fit(models[2], EnsembledModelname[2])]
+    TrainedVGG16 = model_Fit(FineTunedVgg16, EnsembledModelname[0])
+    TrainedResNet50 = model_Fit(FineTunedResNet50, EnsembledModelname[1])
+    TrainedDenseNet201 = model_Fit(FineTunedDenseNet201[0], EnsembledModelname[2])
+    print(type(TrainedVGG16))
+    TrainedModels = [TrainedVGG16, TrainedResNet50, TrainedDenseNet201]
 
+    # Fit된 .hdf5파일의 weights를 load
+    TrainedVGGWeights = TrainedVGG16.load_weights('VGG16_MGL_0206_1.hdf5')
+    TrainedResNetWeights = TrainedResNet50.load_weights('ResNet50_MGL_0206_1.hdf5')
+    TrainedDenseNetWeights = TrainedDenseNet201.load_weights('DenseNet201_MGL_0206_1.hdf5')
 
     """ 3 Model ensemble """
-    ensemble_model = Ensemble(FittedModels, input_shape)  # input_shape = (224, 224, 3)
-    bind_model(ensemble_model)
-
-    '''
-        for x_batch, y_batch in train_datagen.flow(x_train, y_train, batch_size=batch_size):
-
-            #print(x_batch.shape)
-            res = model.fit(x_batch,
-                          y_batch,
-                          callbacks=[reduce_lr],
-                          verbose=0,
-                          shuffle=True
-                          )
-
-        t2 = time.time()
-        print(res.history)
-        print('Training time for one epoch : %.1f' % ((t2 - t1)))
-        train_loss, train_acc = res.history['loss'][0], res.history['acc'][0]
-        #val_loss, val_acc = res.history['val_loss'][0], res.history['val_acc'][0]
-        nsml.report(summary=True, epoch=e, epoch_total=nb_epoch, loss=train_loss, acc=train_acc) #, val_loss=val_loss, val_acc=val_acc)
-        if (e-1) % 5 == 0:
-            nsml.save(e)
-            print('checkpoint name : ' + str(e))
-        batches += 1
-        if batches >= len(x_train) / batch_size:
-            # we need to break the loop by hand becauseba
-            # the generator loops indefinitely
-            break
-    print('Total training time : %.1f' % (time.time() - t0))
-    '''
+    ensemble_model = Ensemble(TrainedVGGWeights, TrainedResNet50,TrainedDenseNet201, input_shape)  # input_shape = (224, 224, 3)

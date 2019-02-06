@@ -2,9 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="c416ff89-fa36-4a56-aca9-d1c0fa45cd82" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/misc.xml" afterPath="$PROJECT_DIR$/.idea/misc.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/team_33_ir_ph2_172.iml" afterPath="$PROJECT_DIR$/.idea/team_33_ir_ph2_172.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/main.py" afterPath="$PROJECT_DIR$/main.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -19,8 +16,8 @@
       <file leaf-file-name="main.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="403">
-              <caret line="172" column="0" lean-forward="true" selection-start-line="172" selection-start-column="0" selection-end-line="172" selection-end-column="0" />
+            <state relative-caret-position="-2840">
+              <caret line="173" column="0" lean-forward="false" selection-start-line="173" selection-start-column="0" selection-end-line="173" selection-end-column="0" />
               <folding>
                 <element signature="e#24#62#0" expanded="true" />
               </folding>
@@ -47,7 +44,6 @@
       <find>get_feature</find>
       <find>bind_model</find>
       <find>model_Fit</find>
-      <find>AddFineTuningLayer</find>
       <find>include_top</find>
       <find>bind</find>
       <find>for</find>
@@ -56,6 +52,8 @@
       <find>fit</find>
       <find>res</find>
       <find>output</find>
+      <find>AddFineTuningLayer</find>
+      <find>load_</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -69,9 +67,9 @@
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="68" />
-    <option name="width" value="885" />
-    <option name="height" value="1031" />
+    <option name="x" value="-6" />
+    <option name="width" value="781" />
+    <option name="height" value="1000" />
   </component>
   <component name="ProjectView">
     <navigator proportions="" version="1">
@@ -122,7 +120,7 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="68" y="0" width="885" height="1031" extended-state="0" />
+    <frame x="-6" y="0" width="781" height="1000" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
@@ -176,8 +174,8 @@
     <entry file="file://C:/Python3_5/Lib/site-packages/keras/engine/training.py" />
     <entry file="file://$PROJECT_DIR$/main.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="403">
-          <caret line="172" column="0" lean-forward="true" selection-start-line="172" selection-start-column="0" selection-end-line="172" selection-end-column="0" />
+        <state relative-caret-position="-2840">
+          <caret line="173" column="0" lean-forward="false" selection-start-line="173" selection-start-column="0" selection-end-line="173" selection-end-column="0" />
           <folding>
             <element signature="e#24#62#0" expanded="true" />
           </folding>
