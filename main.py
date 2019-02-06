@@ -12,6 +12,7 @@ import numpy as np
 
 from nsml import DATASET_PATH
 import keras
+from keras.callbacks import History
 from keras.models import Model, Input
 from keras.layers import Dense, Dropout, Flatten, Activation, GlobalAveragePooling2D, Average
 from keras.layers import Conv2D, MaxPooling2D
@@ -164,14 +165,20 @@ def AddFineTuningLayer(basemodel, modelname):
         NotImplementedError
 
 def Ensemble(models, model_input_shape):
+    # Fit된 .hdf5파일의 weights를 load
+    TrainedVGG = models[0].load_weights(models[0].checkpointname + '.hdf5')
+    TrainedResNet = models[1].load_weights(models[1].checkpointname + '.hdf5')
+    TrainedDenseNet = models[2].load_weights(models[2].checkpointname + '.hdf5')
+    TrainedModels = [TrainedVGG, TrainedResNet, TrainedDenseNet]
+
     # 3개의 모델로부터 나온 softmax 확률값을 평균냄.
-    outputs = [model.outputs[0] for model in models]
+    outputs = [model.outputs[0] for model in TrainedModels]
     merged = Average()(outputs)
     Finalmodel = Model(model_input_shape, merged, name='ensemble')
     return Finalmodel
 
 # model = Model(basemodel.input, outputs=x)
-def model_Fit(model):
+def model_Fit(model, Modelname):
     t0 = time.time()
     for e in range(nb_epoch):
         t1 = time.time()
@@ -203,15 +210,30 @@ def model_Fit(model):
         train_loss, train_acc = res.history['loss'][0], res.history['acc'][0]
         #val_loss, val_acc = res.history['val_loss'][0], res.history['val_acc'][0]
         nsml.report(summary=True, epoch=e, epoch_total=nb_epoch, loss=train_loss, acc=train_acc)#, val_loss=val_loss, val_acc=val_acc)
-        if (e+1) % 40 == 0:
-            nsml.save(e)
-            print('checkpoint name : ' + str(e))
+        if nb_epoch == 1:
+            if Modelname == 'VGG16':
+                checkpointname = Modelname + "_MGL_0206_" + str(nb_epoch)
+                print('checkpoint name : ' + checkpointname)
+                nsml.save(checkpoint = checkpointname)
+            elif Modelname == 'ResNet50':
+                checkpointname = Modelname + "_MGL_0206_" + str(nb_epoch)
+                print('checkpoint name : ' + checkpointname)
+                nsml.save(checkpoint=checkpointname)
+            elif Modelname == 'DenseNet201':
+                checkpointname = Modelname + "_MGL_0206_" + str(nb_epoch)
+                print('checkpoint name : ' + checkpointname)
+                nsml.save(checkpoint=checkpointname)
+            else:
+                NotImplementedError
+        # if (e+1) % 40 == 0:
+        #     nsml.save(e)
+        #     print('checkpoint name : ' + str(e))
         # 메모리 해제
         del x_train
         del y_train
         gc.collect()
     print('Total training time : %.1f' % (time.time() - t0))
-    return res
+    return model, checkpointname
 
 if __name__ == '__main__':
     args = argparse.ArgumentParser()
@@ -237,16 +259,17 @@ if __name__ == '__main__':
     num_classes = config.num_classes
     input_shape = (224, 224, 3)  # input image shape
     lr = config.lr
+    EnsembledModelname = ['VGG16', 'ResNet50', 'DenseNet201']
 
     """ Base Models """
-    base_model1 = VGG16(input_shape=input_shape, weights='imagenet', include_top=False, classes=num_classes)
-    base_model2 = ResNet50(input_shape=input_shape, weights='imagenet', include_top=False, classes=num_classes)
-    base_model3 = DenseNet201(input_shape=input_shape, weights='imagenet', include_top=False, classes=num_classes)
+    base_model1 = VGG16(input_shape=input_shape, weights=None, include_top=False, classes=num_classes)
+    base_model2 = ResNet50(input_shape=input_shape, weights=None, include_top=False, classes=num_classes)
+    base_model3 = DenseNet201(input_shape=input_shape, weights=None, include_top=False, classes=num_classes)
 
     """ Add Finetuning Layers"""
-    model1 = AddFineTuningLayer(base_model1, 'VGG16')
-    model2 = AddFineTuningLayer(base_model2, 'ResNet50')
-    model3 = AddFineTuningLayer(base_model3, 'DenseNet201')
+    model1 = AddFineTuningLayer(base_model1, EnsembledModelname[0])
+    model2 = AddFineTuningLayer(base_model2, EnsembledModelname[1])
+    model3 = AddFineTuningLayer(base_model3, EnsembledModelname[2])
     models = [model1, model2, model3]
 
     if config.pause:
@@ -263,10 +286,9 @@ if __name__ == '__main__':
         # opt = keras.optimizers.SGD(lr=lr, momentum=0.9, nesterov=True, decay= 1e-5)
 
         """ Compile 3 Models """
-        for modelnum in models:
-            models[modelnum].compile(loss='categorical_crossentropy',
-                   optimizer=opt,
-                   metrics=['accuracy'])
+        model1.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
+        model2.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
+        model3.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
 
         train_dataset_path = DATASET_PATH + '/train/train_data'
 
@@ -300,9 +322,10 @@ if __name__ == '__main__':
         reduce_lr = ReduceLROnPlateau(monitor=monitor, patience=2, verbose=1)
 
     """ Model Fit, Training Loop, Checkpoint save """
-    FittedModels = []
-    for modelnum in models:
-        FittedModels[modelnum] = model_Fit(models[modelnum])
+    FittedModels = [model_Fit(models[0], EnsembledModelname[0]),
+                    model_Fit(models[1], EnsembledModelname[1]),
+                    model_Fit(models[2], EnsembledModelname[2])]
+
 
     """ 3 Model ensemble """
     ensemble_model = Ensemble(FittedModels, input_shape)  # input_shape = (224, 224, 3)
