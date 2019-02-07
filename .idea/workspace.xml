@@ -15,8 +15,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-7069">
-              <caret line="34" column="4" selection-start-line="34" selection-start-column="4" selection-end-line="34" selection-end-column="4" />
+            <state relative-caret-position="290">
+              <caret line="308" column="8" selection-start-line="308" selection-start-column="8" selection-end-line="308" selection-end-column="89" />
               <folding>
                 <element signature="e#24#62#0" expanded="true" />
               </folding>
@@ -66,12 +66,12 @@
       <find>vgg16</find>
       <find>pause</find>
       <find>nsml.load</find>
-      <find>ensemble</find>
       <find>bind</find>
       <find>finetuned</find>
       <find>input_shape</find>
       <find>basemodel</find>
       <find>model_input</find>
+      <find>ensemble</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -139,7 +139,6 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="890" y="0" width="1450" height="1087" extended-state="0" />
-    <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.09348442" />
       <window_info id="Structure" order="1" weight="0.25" />
@@ -190,8 +189,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/main.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-7069">
-          <caret line="34" column="4" selection-start-line="34" selection-start-column="4" selection-end-line="34" selection-end-column="4" />
+        <state relative-caret-position="290">
+          <caret line="308" column="8" selection-start-line="308" selection-start-column="8" selection-end-line="308" selection-end-column="89" />
           <folding>
             <element signature="e#24#62#0" expanded="true" />
           </folding>

@@ -37,24 +37,26 @@ def Ensemble(TrainedModels, model_input):
     # collect outputs of models in a list
     yModels = [model(model_input) for model in TrainedModels]
     # outputs = [model.outputs[0] for model in TrainedModels]
+    print('type of yModels[0] : ')
+    print(type(yModels[0]))
 
     # averaging outputs
-    merged = layers.average(yModels)
-    print('type of merged : ')
-    print(type(merged))
+    # merged = layers.average(yModels)
+    # print('type of merged : ')
+    # print(type(merged))
 
     # build model from same input and avg output
-    Finalmodel = Model(inputs = model_input, outputs = merged, name='ensemble')
-    bind_model(Finalmodel)
-    Finalmodel.summary()
-    print('type of Finalmodel : ')
-    print(type(Finalmodel))
+    # Finalmodel = Model(inputs = model_input, outputs = merged, name='ensemble')
+    # bind_model(Finalmodel)
+    # Finalmodel.summary()
+    # print('type of Finalmodel : ')
+    # print(type(Finalmodel))
 
-    checkpointname = "En_MGL_0207_" + str(nb_epoch)
-    nsml.save(checkpoint=checkpointname)
-    print('Checkpoint Saved! : ' + checkpointname)
-
-    return Finalmodel
+    # checkpointname = "En_MGL_0207_" + str(nb_epoch)
+    # nsml.save(checkpoint=checkpointname)
+    # print('Checkpoint Saved! : ' + checkpointname)
+    #
+    # return Finalmodel
 
 def bind_model(model):
     def save(dir_name):
@@ -278,8 +280,6 @@ if __name__ == '__main__':
     batch_size = config.batch_size
     num_classes = config.num_classes
     input_shape = (224, 224, 3)  # input image shape
-    print('type of model_input : ')
-    print(type(model_input))
     lr = config.lr
     EnsembledModelname = ['InceptionV3', 'ResNet50', 'DenseNet201']
 
@@ -287,6 +287,11 @@ if __name__ == '__main__':
     base_model1 = InceptionV3(input_shape = input_shape, weights=None, include_top=False, classes=1000) # base_model1 : <class 'keras.engine.training.Model'>
     base_model2 = ResNet50(input_shape = input_shape, weights=None, include_top=False, classes=1000)
     base_model3 = DenseNet201(input_shape = input_shape, weights=None, include_top=False, classes=1000)
+
+    model_input = Input(shape=base_model1.input_shape, name='image_input')
+    print(type(model_input))
+    print(model_input)
+    # model_input = Input(shape=TrainedModels[0].input_shape[:3], name='image_input')
 
     """ Add Finetuning Layers and bind to model """
     FineTunedInceptionV3 = AddFineTuningLayer(base_model1, model_input, EnsembledModelname[0]) # FineTunedInceptionV3 : <class 'keras.engine.training.Model'>
@@ -340,9 +345,5 @@ if __name__ == '__main__':
         FineTunedResNet50 = model_Fit(FineTunedResNet50, EnsembledModelname[1])
         FineTunedDenseNet201 = model_Fit(FineTunedDenseNet201, EnsembledModelname[2])
         TrainedModels = [FineTunedInceptionV3[0], FineTunedResNet50[0], FineTunedDenseNet201[0]] # FineTunedInceptionV3[0] : <class 'keras.engine.training.Model'>
-        model_input = Input(shape=TrainedModels[0].input_shape, name='image_input')
-        print(type(model_input))
-        print(model_input)
-        # model_input = Input(shape=TrainedModels[0].input_shape[:3], name='image_input')
 
         Ensemble(TrainedModels, model_input)
