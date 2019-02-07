@@ -14,10 +14,13 @@ from nsml import DATASET_PATH
 import keras
 from keras.models import Sequential, Model
 from keras.layers import Dense, Dropout, Flatten, Activation
-from keras.layers import Conv2D, MaxPooling2D
+from keras.layers import Conv2D, MaxPooling2D, GlobalAveragePooling2D
 from keras.callbacks import ReduceLROnPlateau
 from keras.preprocessing.image import ImageDataGenerator
-
+from keras.utils.training_utils import multi_gpu_model
+from keras.applications.nasnet import *
+from keras.applications.densenet import *
+#from DenseNet import densenet169
 
 def bind_model(model):
     def save(dir_name):
@@ -77,8 +80,12 @@ def get_feature(model, queries, db):
     img_size = (224, 224)
     test_path = DATASET_PATH + '/test/test_data'
 
-    intermediate_layer_model = Model(inputs=model.input, outputs=model.get_layer('dense_2').output)
-    test_datagen = ImageDataGenerator(rescale=1. / 255, dtype='float32')
+    mean = np.array([144.62598745, 132.1989693, 119.10957842], dtype=np.float32).reshape((1, 1, 3)) / 255.0
+    std = np.array([5.71350834, 7.67297079, 8.68071288], dtype=np.float32).reshape((1, 1, 3)) / 255.0
+
+    intermediate_layer_model = Model(inputs=model.layers[0].input, outputs=model.layers[-1].output)
+    test_datagen = ImageDataGenerator(rescale=1. / 255, dtype='float32',featurewise_center=True,
+            featurewise_std_normalization=True)
     query_generator = test_datagen.flow_from_directory(
         directory=test_path,
         target_size=(224, 224),
@@ -88,7 +95,13 @@ def get_feature(model, queries, db):
         class_mode=None,
         shuffle=False
     )
+
+    test_datagen.mean = mean
+    test_datagen.std = std
+
     query_vecs = intermediate_layer_model.predict_generator(query_generator, steps=len(query_generator), verbose=1)
+
+
 
     reference_generator = test_datagen.flow_from_directory(
         directory=test_path,
@@ -99,6 +112,10 @@ def get_feature(model, queries, db):
         class_mode=None,
         shuffle=False
     )
+
+    test_datagen.mean = mean
+    test_datagen.std = std
+
     reference_vecs = intermediate_layer_model.predict_generator(reference_generator, steps=len(reference_generator),
                                                                 verbose=1)
 
@@ -109,10 +126,11 @@ if __name__ == '__main__':
     args = argparse.ArgumentParser()
 
     # hyperparameters
-    args.add_argument('--epoch', type=int, default=5)
+    args.add_argument('--epochs', type=int, default=200)
+    args.add_argument('--epoch', type=int, default=200)
     args.add_argument('--batch_size', type=int, default=64)
     args.add_argument('--num_classes', type=int, default=1383)
-
+    args.add_argument('--lr', type=float, default=0.0001)
     # DONOTCHANGE: They are reserved for nsml
     args.add_argument('--mode', type=str, default='train', help='submit일때 해당값이 test로 설정됩니다.')
     args.add_argument('--iteration', type=str, default='0',
@@ -125,32 +143,30 @@ if __name__ == '__main__':
     batch_size = config.batch_size
     num_classes = config.num_classes
     input_shape = (224, 224, 3)  # input image shape
+    lr = config.lr
+    mean = np.array([144.62598745, 132.1989693, 119.10957842], dtype=np.float32).reshape((1, 1, 3)) / 255.0
+    std = np.array([5.71350834, 7.67297079, 8.68071288], dtype=np.float32).reshape((1, 1, 3)) / 255.0
+
+
 
     """ Model """
-    model = Sequential()
-    model.add(Conv2D(32, (3, 3), padding='same', input_shape=input_shape))
-    model.add(Activation('relu'))
-    model.add(Conv2D(32, (3, 3)))
-    model.add(Activation('relu'))
-    model.add(MaxPooling2D(pool_size=(2, 2)))
-    model.add(Dropout(0.25))
+    #model = NASNetMobile(input_shape=input_shape, weights=None, include_top=True, classes=num_classes)
 
-    model.add(Conv2D(64, (3, 3), padding='same'))
-    model.add(Activation('relu'))
-    model.add(Conv2D(64, (3, 3)))
-    model.add(Activation('relu'))
-    model.add(MaxPooling2D(pool_size=(2, 2)))
-    model.add(Dropout(0.25))
+    basemodel = DenseNet169(input_shape=input_shape, weights='imagenet', include_top=False, classes=1000)
+    #basemodel = NASNetMobile(input_shape=input_shape, weights='imagenet', include_top = False, classes = 1000, dropout=0.5)
+    x = basemodel.output
+    x = GlobalAveragePooling2D()(x)
+    x = Dense(num_classes)(x)
+    x = Activation('softmax')(x)
+    model = Model(inputs=basemodel.input, outputs=x)
 
-    model.add(Flatten())
-    model.add(Dense(512))
-    model.add(Activation('relu'))
-    model.add(Dropout(0.5))
-    model.add(Dense(num_classes))
-    model.add(Activation('softmax'))
     model.summary()
 
     bind_model(model)
+
+
+
+
 
     if config.pause:
         nsml.paused(scope=locals())
@@ -158,9 +174,14 @@ if __name__ == '__main__':
     bTrainmode = False
     if config.mode == 'train':
         bTrainmode = True
+        nsml.load(checkpoint=20, session='team_33/ir_ph2/393')           # load시 수정 필수!
+        nsml.save(20)
 
+        #model = multi_gpu_model(model, gpus=2)
         """ Initiate RMSprop optimizer """
-        opt = keras.optimizers.rmsprop(lr=0.00045, decay=1e-6)
+        #opt = keras.optimizers.rmsprop(lr=lr, decay=1e-6)
+        opt = keras.optimizers.SGD(lr=lr, momentum=0.9, nesterov=True, decay= 1e-6)
+
         model.compile(loss='categorical_crossentropy',
                       optimizer=opt,
                       metrics=['accuracy'])
@@ -169,9 +190,15 @@ if __name__ == '__main__':
 
         train_datagen = ImageDataGenerator(
             rescale=1. / 255,
+            rotation_range=180,
+            width_shift_range=0.2,
+            height_shift_range=0.2,
             shear_range=0.2,
             zoom_range=0.2,
-            horizontal_flip=True)
+            featurewise_center=True,
+            featurewise_std_normalization=True,
+            horizontal_flip=True
+        )
 
         train_generator = train_datagen.flow_from_directory(
             directory=DATASET_PATH + '/train/train_data',
@@ -183,9 +210,13 @@ if __name__ == '__main__':
             seed=42
         )
 
+        train_datagen.mean = mean
+        train_datagen.std = std
+
+
         """ Callback """
         monitor = 'acc'
-        reduce_lr = ReduceLROnPlateau(monitor=monitor, patience=3)
+        reduce_lr = ReduceLROnPlateau(monitor=monitor, patience=3, verbose=1)
 
         """ Training loop """
         STEP_SIZE_TRAIN = train_generator.n // train_generator.batch_size
@@ -204,5 +235,7 @@ if __name__ == '__main__':
             print('Training time for one epoch : %.1f' % ((t2 - t1)))
             train_loss, train_acc = res.history['loss'][0], res.history['acc'][0]
             nsml.report(summary=True, epoch=epoch, epoch_total=nb_epoch, loss=train_loss, acc=train_acc)
-            nsml.save(epoch)
-        print('Total training time : %.1f' % (time.time() - t0))
+            if (epoch+1) % 1 == 0:
+                nsml.save(str(epoch+1))
+                print('checkpoint name : ' + str(epoch+1))
+            print('Total training time : %.1f' % (time.time() - t0))
