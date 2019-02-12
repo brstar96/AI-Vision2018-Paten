@@ -1,4 +1,6 @@
 # -*- coding: utf_8 -*-
+# CNN + XGBoost + Softmax 구현을 위한 baselinecode (AvgEnsemble코드에서 fork)
+
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -12,6 +14,11 @@ import numpy as np
 import h5py
 
 from nsml import DATASET_PATH
+print(DATASET_PATH)
+print (os.getcwd()) #현재 디렉토리의
+print (os.path.realpath(__file__))#파일
+print (os.path.dirname(os.path.realpath(__file__)) )#파일이 위치한 디렉토리
+
 import keras
 from keras.callbacks import History
 from keras import Input, layers
@@ -20,7 +27,7 @@ from keras.layers import Dense, Dropout, Flatten, Activation, GlobalAveragePooli
 from keras.layers import Conv2D, MaxPooling2D
 from keras.callbacks import ReduceLROnPlateau, LearningRateScheduler
 from keras.preprocessing.image import ImageDataGenerator
-from data_loader import train_data_loader,train_data_balancing
+from data_loader import train_data_balancing
 
 # pretrained models from Keras
 from keras.applications.inception_v3 import *
@@ -30,39 +37,18 @@ from keras.applications.densenet import *
 from keras.utils.training_utils import multi_gpu_model
 import gc
 
+train_dataset_path = DATASET_PATH + '/train/train_data'
+mean = np.array([144.62598745, 132.1989693, 119.10957842], dtype=np.float32).reshape((1, 1, 3)) / 255.0
+std = np.array([5.71350834, 7.67297079, 8.68071288], dtype=np.float32).reshape((1, 1, 3)) / 255.0
+
 np.set_printoptions(threshold=np.nan)
-
-def Ensemble(TrainedModels, model_input):
-    # 3개의 모델로부터 나온 softmax 확률값을 평균냄.
-    # collect outputs of models in a list
-    yModels = [model(model_input) for model in TrainedModels]
-    # outputs = [model.outputs[0] for model in TrainedModels]
-    print('type of yModels[0] : ')
-    print(type(yModels[0]))
-
-    # averaging outputs
-    # merged = layers.average(yModels)
-    # print('type of merged : ')
-    # print(type(merged))
-
-    # build model from same input and avg output
-    # Finalmodel = Model(inputs = model_input, outputs = merged, name='ensemble')
-    # bind_model(Finalmodel)
-    # Finalmodel.summary()
-    # print('type of Finalmodel : ')
-    # print(type(Finalmodel))
-
-    # checkpointname = "En_MGL_0207_" + str(nb_epoch)
-    # nsml.save(checkpoint=checkpointname)
-    # print('Checkpoint Saved! : ' + checkpointname)
-    #
-    # return Finalmodel
 
 def bind_model(model):
     def save(dir_name):
         os.makedirs(dir_name, exist_ok=True)
         model.save_weights(os.path.join(dir_name, 'model'))
         print('model saved!')
+
 
     def load(file_path):
         model.load_weights(file_path)
@@ -120,18 +106,18 @@ def get_feature(model, queries, db):
                                       featurewise_std_normalization=True,
                                       featurewise_center=True)
 
-    test_datagen.mean = np.array([144.62598745, 132.1989693, 119.10957842], dtype=np.float32).reshape((1, 1, 3))
-    test_datagen.std = np.array([5.71350834, 7.67297079, 8.68071288], dtype=np.float32).reshape((1, 1, 3))
-
     query_generator = test_datagen.flow_from_directory(
         directory=test_path,
         target_size=(224, 224),
         classes=['query'],
         color_mode="rgb",
-        batch_size=32,
+        batch_size=64,
         class_mode=None,
         shuffle=False
     )
+    test_datagen.mean = mean
+    test_datagen.std = std
+
     query_vecs = intermediate_layer_model.predict_generator(query_generator, steps=len(query_generator), verbose=1)
 
     reference_generator = test_datagen.flow_from_directory(
@@ -139,19 +125,20 @@ def get_feature(model, queries, db):
         target_size=(224, 224),
         classes=['reference'],
         color_mode="rgb",
-        batch_size=32,
+        batch_size=64,
         class_mode=None,
         shuffle=False
     )
+    test_datagen.mean = mean
+    test_datagen.std = std
+
     reference_vecs = intermediate_layer_model.predict_generator(reference_generator, steps=len(reference_generator),
                                                                 verbose=1)
 
     return queries, query_vecs, db, reference_vecs
 
-def balancing_process(train_dataset_path,input_shape, num_classes,nb_epoch):
-    img_list = []
-    label_list = []
-    img_list, label_list = train_data_balancing(train_dataset_path, input_shape[:2], num_classes,nb_epoch)  # nb_epoch은 0~1382개 뽑히는 리스트가 총 몇 번 iteration 하고 싶은지
+def balancing_process(train_dataset_path,input_shape, fork_epoch ,nb_epoch):
+    img_list, label_list = train_data_balancing(train_dataset_path, input_shape[:2], fork_epoch,nb_epoch)  # nb_epoch은 0~1382개 뽑히는 리스트가 총 몇 번 iteration 하고 싶은지
     # print("list"+str(1)+" label : "+str(label_list[1])+", img : "+str(img_list[1])) 뽑힌 리스트의 내용 확인하는 출력문구
 
     x_train = np.asarray(img_list, dtype=np.float32)  # (1383, 224, 224, 3)
@@ -171,7 +158,11 @@ def AddFineTuningLayer(basemodel, model_input, modelname):
         x = GlobalAveragePooling2D(name='avg_pool')(x)
         x = Dense(config.num_classes, activation='softmax', name='fc1383')(x)
         model = Model(inputs = basemodel.input, outputs = x, name = 'InceptionV3')
+        # model = Model(inputs=model_input, outputs=x, name='InceptionV3') # 위에 코드 안먹히면 이걸로 다시 테스트 해볼것.
         bind_model(model)
+        for i in range(0, 3):
+            print('')
+        print('=================== ' + modelname + ' has been successfully Modfied! ===================')
         model.summary()
         return model
     elif modelname == 'ResNet50':
@@ -182,38 +173,46 @@ def AddFineTuningLayer(basemodel, model_input, modelname):
         x = Dense(config.num_classes, activation='softmax', name='fc1383')(x)
         model = Model(inputs = basemodel.input, outputs = x, name = 'ResNet50')
         bind_model(model)
+        for i in range(0, 3):
+            print('')
+        print('=================== ' + modelname + ' has been successfully Modfied! ===================')
         model.summary()
         return model
-    elif modelname == 'DenseNet201':
+    elif modelname == 'DenseNet169':
         basemodel.trainable = False
         x = basemodel.output
         # avg_pool (GlobalAveragePooling2 (None, 1920) 0 relu[0][0]
         x = GlobalAveragePooling2D(name='avg_pool')(x)  # same as ResNet50
         x = Dense(config.num_classes, activation='softmax', name='fc1383')(x)  # same as ResNet50
-        model = Model(input = basemodel.input, outputs = x, name = 'DenseNet201')
+        model = Model(inputs = basemodel.input, outputs = x, name = 'DenseNet169')
         bind_model(model)
+        for i in range(0, 3):
+            print('')
+        print('=================== ' + modelname + ' has been successfully Modfied! ===================')
         model.summary()
         return model
     else:
         NotImplementedError
 
-
-
 def model_Fit(model, Modelname):
     t0 = time.time()
     for e in range(nb_epoch):
         t1 = time.time()
-        print('Epochs : ', e)
+        print('')
+        print(Modelname + ' Epochs : ', e)
         '''epoch에 맞게 x_rain,y_train가져오기 '''
-        x_train, y_train = balancing_process(train_dataset_path, input_shape, num_classes, e)
-        #model.evaluate(x_train, y_train, batch_size=batch_size,verbose=1)
-        #print(x_train.shape)
+        x_train, y_train = balancing_process(train_dataset_path, input_shape, st_epoch, e)
 
+        # train_datagen.fit(x_train)
         train_generator = train_datagen.flow(
             x_train, y_train,
             batch_size=batch_size,
             shuffle=True,
         )
+
+        # 새로 데이터 넣어줄때마다 mean std 설정
+        train_datagen.mean = mean
+        train_datagen.std = std
 
         STEP_SIZE_TRAIN = train_generator.n // train_generator.batch_size
         res = model.fit_generator(generator=train_generator,
@@ -230,26 +229,28 @@ def model_Fit(model, Modelname):
         train_loss, train_acc = res.history['loss'][0], res.history['acc'][0]
         #val_loss, val_acc = res.history['val_loss'][0], res.history['val_acc'][0]
         nsml.report(summary=True, epoch=e, epoch_total=nb_epoch, loss=train_loss, acc=train_acc)#, val_loss=val_loss, val_acc=val_acc)
-        if nb_epoch == 1:
-            if Modelname == 'InceptionV3':
-                print('Model generated : ' + Modelname + "_" + str(nb_epoch))
-                # nsml.save(checkpoint=checkpointname)
-                # print('checkpoint name : ' + checkpointname)
-            elif Modelname == 'ResNet50':
-                print('Model generated : ' + Modelname + "_" + str(nb_epoch))
-                # checkpointname = Modelname + "_MGL_0206_" + str(nb_epoch)
-                # print('checkpoint name : ' + checkpointname)
-                # nsml.save(checkpoint=checkpointname)
-            elif Modelname == 'DenseNet201':
-                print('Model generated : ' + Modelname + "_" + str(nb_epoch))
-                # checkpointname = Modelname + "_MGL_0206_" + str(nb_epoch)
-                # print('checkpoint name : ' + checkpointname)
-                # nsml.save(checkpoint=checkpointname)
-            else:
-                NotImplementedError
-        # if (e+1) % 40 == 0:
-        #     nsml.save(e)
-        #     print('checkpoint name : ' + str(e))
+
+        if Modelname == 'InceptionV3':
+            print('Model generated : ' + Modelname + "_" + str(e+1))
+            if (e + 1) % 10 == 0:
+                CkptName = Modelname + '_' + str(e+1)
+                nsml.save(CkptName)
+                print('checkpoint name : ' + str(CkptName))
+        elif Modelname == 'ResNet50':
+            print('Model generated : ' + Modelname + "_" + str(e+1))
+            if (e + 1) % 10 == 0:
+                CkptName = Modelname + '_' + str(e+1)
+                nsml.save(CkptName)
+                print('checkpoint name : ' + str(CkptName))
+        elif Modelname == 'DenseNet169':
+            print('Model generated : ' + Modelname + "_" + str(e+1))
+            if (e + 1) % 10 == 0:
+                CkptName = Modelname + '_' + str(e+1)
+                nsml.save(CkptName)
+                print('checkpoint name : ' + str(CkptName))
+        else:
+            NotImplementedError
+
         # 메모리 해제
         del x_train
         del y_train
@@ -262,8 +263,8 @@ if __name__ == '__main__':
 
     # hyperparameters
     # epochs가 없으면 fork시 버그 걸려서 넣어둠
-    args.add_argument('--epochs', type=int, default=1)
-    args.add_argument('--epoch', type=int, default=1)
+    args.add_argument('--epochs', type=int, default=200)
+    args.add_argument('--epoch', type=int, default=200)
     args.add_argument('--batch_size', type=int, default=64)
     args.add_argument('--num_classes', type=int, default=1383)
     args.add_argument('--lr', type=float, default=0.001)
@@ -273,32 +274,34 @@ if __name__ == '__main__':
     args.add_argument('--iteration', type=str, default='0',
                       help='fork 명령어를 입력할때의 체크포인트로 설정됩니다. 체크포인트 옵션을 안주면 마지막 wall time 의 model 을 가져옵니다.')
     args.add_argument('--pause', type=int, default=0, help='model 을 load 할때 1로 설정됩니다.')
+    args.add_argument('--opt', type=str, default='rmsprop')
     config = args.parse_args()
 
     # training parameters
+    opt = config.opt
     nb_epoch = config.epoch
     batch_size = config.batch_size
     num_classes = config.num_classes
     input_shape = (224, 224, 3)  # input image shape
     lr = config.lr
-    EnsembledModelname = ['InceptionV3', 'ResNet50', 'DenseNet201']
+    st_epoch = config.iteration  # fork할 때, balancing count 받아오기 위해서 iteration = start epoch
+    ModelNames = ['InceptionV3', 'ResNet50', 'DenseNet169']
 
-    """ Base Models """
-    base_model1 = InceptionV3(input_shape = input_shape, weights=None, include_top=False, classes=1000) # base_model1 : <class 'keras.engine.training.Model'>
-    base_model2 = ResNet50(input_shape = input_shape, weights=None, include_top=False, classes=1000)
-    base_model3 = DenseNet201(input_shape = input_shape, weights=None, include_top=False, classes=1000)
+    """ Load Base Models and Setting Input Shape """
+    # weights='imagenet'
+    base_model1 = InceptionV3(input_shape = input_shape, weights='imagenet', include_top=False, classes=1000) # base_model1 : <class 'keras.engine.training.Model'>
+    base_model2 = ResNet50(input_shape = input_shape, weights='imagenet', include_top=False, classes=1000)
+    base_model3 = DenseNet169(input_shape = input_shape, weights='imagenet', include_top=False, classes=1000)
 
-    model_input = Input(shape=base_model1.input_shape, name='image_input')
-    print(type(model_input))
-    print(model_input)
-    # model_input = Input(shape=TrainedModels[0].input_shape[:3], name='image_input')
+    model_input1 = Input(shape=base_model1.input_shape, name='image_input')
+    model_input2 = Input(shape=base_model2.input_shape, name='image_input')
+    model_input3 = Input(shape=base_model3.input_shape, name='image_input')
 
-    """ Add Finetuning Layers and bind to model """
-    FineTunedInceptionV3 = AddFineTuningLayer(base_model1, model_input, EnsembledModelname[0]) # FineTunedInceptionV3 : <class 'keras.engine.training.Model'>
-    FineTunedResNet50 = AddFineTuningLayer(base_model2, model_input, EnsembledModelname[1])
-    FineTunedDenseNet201 = AddFineTuningLayer(base_model3, model_input, EnsembledModelname[2])
+    """ Add Finetuning Layers to pre-trained model and bind to NSML """
+    FineTunedInceptionV3 = AddFineTuningLayer(base_model1, model_input1, ModelNames[0]) # FineTunedInceptionV3 : <class 'keras.engine.training.Model'>
+    FineTunedResNet50 = AddFineTuningLayer(base_model2, model_input2, ModelNames[1])
+    FineTunedDenseNet169 = AddFineTuningLayer(base_model3, model_input3, ModelNames[2])
 
-    print('infer init')
     if config.pause:
         nsml.paused(scope=locals())
 
@@ -309,41 +312,45 @@ if __name__ == '__main__':
         #nsml.load(checkpoint=151, session='team_33/ir_ph2/141')           # load시 수정 필수!
 
         """ Initiate RMSprop optimizer """
-        opt = keras.optimizers.rmsprop(lr=lr, decay=1e-5)
-        # opt = keras.optimizers.SGD(lr=lr, momentum=0.9, nesterov=True, decay= 1e-5)
+        if (opt == 'rmsprop'):
+            opt = keras.optimizers.rmsprop(lr=lr, decay=1e-6)
+        elif (opt == 'sgd'):
+            opt = keras.optimizers.SGD(lr=lr, momentum=0.9, nesterov=True, decay=1e-6)
 
         """ Compile 3 Models """
         FineTunedInceptionV3.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy']) # <class 'keras.engine.training.Model'>
         FineTunedResNet50.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
-        FineTunedDenseNet201.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
+        FineTunedDenseNet169.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
 
-        train_dataset_path = DATASET_PATH + '/train/train_data'
         train_datagen = ImageDataGenerator(
-            rescale=1. / 255,
-            rotation_range=180,
-            width_shift_range=0.2,
-            height_shift_range=0.2,
-            shear_range=0.2,
-            zoom_range=0.2,
-            horizontal_flip=True,
-            vertical_flip=True,
+            # rescale=1. / 255,
+            # rotation_range=180,
+            # width_shift_range=0.2,
+            # height_shift_range=0.2,
+            # shear_range=0.2,
+            # zoom_range=0.2,
+            # horizontal_flip=True,
+            # vertical_flip=True,
             featurewise_center=True,
             featurewise_std_normalization=True
         )
-
-        # mean RGB: [144.62598745, 132.1989693, 119.10957842]
-        # std RGB: [5.71350834, 7.67297079, 8.68071288]
-        train_datagen.mean = np.array([144.62598745, 132.1989693, 119.10957842], dtype=np.float32).reshape((1,1,3))
-        train_datagen.std = np.array([5.71350834, 7.67297079, 8.68071288], dtype=np.float32).reshape((1, 1, 3))
+        train_datagen.mean = mean
+        train_datagen.std = std
 
         """ Callback """
         monitor = 'acc'
-        reduce_lr = ReduceLROnPlateau(monitor=monitor, patience=2, verbose=1)
+        reduce_lr = ReduceLROnPlateau(monitor=monitor, patience=3, verbose=1)
 
         """ Model Fit, Training Loop, Checkpoint save """
-        FineTunedInceptionV3 = model_Fit(FineTunedInceptionV3, EnsembledModelname[0])
-        FineTunedResNet50 = model_Fit(FineTunedResNet50, EnsembledModelname[1])
-        FineTunedDenseNet201 = model_Fit(FineTunedDenseNet201, EnsembledModelname[2])
-        TrainedModels = [FineTunedInceptionV3[0], FineTunedResNet50[0], FineTunedDenseNet201[0]] # FineTunedInceptionV3[0] : <class 'keras.engine.training.Model'>
+        FineTunedInceptionV3 = model_Fit(FineTunedInceptionV3, ModelNames[0])
+        del FineTunedInceptionV3
+        print(ModelNames[0] + ' has been deleted.')
+        FineTunedResNet50 = model_Fit(FineTunedResNet50, ModelNames[1])
+        del FineTunedResNet50
+        print(ModelNames[1] + ' has been deleted.')
+        FineTunedDenseNet169 = model_Fit(FineTunedDenseNet169, ModelNames[2])
+        del FineTunedDenseNet169
+        print(ModelNames[2] + ' has been deleted.')
+        # TrainedModels = [FineTunedInceptionV3[0], FineTunedResNet50[0], FineTunedDenseNet169[0]] # FineTunedInceptionV3[0] : <class 'keras.engine.training.Model'>
 
-        Ensemble(TrainedModels, model_input)
+    # place ensemble functioncall here
