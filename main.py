@@ -100,6 +100,9 @@ def get_feature(model, queries, db):
     img_size = (224, 224)
     test_path = DATASET_PATH + '/test/test_data'
 
+    mean = np.array([144.62598745, 132.1989693, 119.10957842], dtype=np.float32).reshape((1, 1, 3)) / 255.0
+    std = np.array([5.71350834, 7.67297079, 8.68071288], dtype=np.float32).reshape((1, 1, 3)) / 255.0
+
     intermediate_layer_model = Model(inputs=model.layers[0].input, outputs=model.layers[-1].output)
     test_datagen = ImageDataGenerator(rescale=1. / 255,
                                       dtype='float32',
@@ -199,7 +202,7 @@ def model_Fit(model, Modelname):
     for e in range(nb_epoch):
         t1 = time.time()
         print('')
-        print(Modelname + ' Epochs : ', e)
+        print(Modelname + ' Epochs : ', e+1)
         '''epoch에 맞게 x_rain,y_train가져오기 '''
         x_train, y_train = balancing_process(train_dataset_path, input_shape, st_epoch, e)
 
@@ -231,21 +234,25 @@ def model_Fit(model, Modelname):
         nsml.report(summary=True, epoch=e, epoch_total=nb_epoch, loss=train_loss, acc=train_acc)#, val_loss=val_loss, val_acc=val_acc)
 
         if Modelname == 'InceptionV3':
-            print('Model generated : ' + Modelname + "_" + str(e+1))
-            if (e + 1) % 10 == 0:
-                CkptName = Modelname + '_' + str(e+1)
+            print('Model generated : ' + Modelname + "_" + str(e))
+            if (e) % 20 == 0:
+                CkptName = 'Ip' + '_' + str(e)
                 nsml.save(CkptName)
                 print('checkpoint name : ' + str(CkptName))
+            if e > 10 and e < 20:
+                CkptName = 'tIp' + '_' + str(e)
+                nsml.save(str(CkptName))
+                print('checkpoint name : ' + str(CkptName))
         elif Modelname == 'ResNet50':
-            print('Model generated : ' + Modelname + "_" + str(e+1))
-            if (e + 1) % 10 == 0:
-                CkptName = Modelname + '_' + str(e+1)
+            print('Model generated : ' + Modelname + "_" + str(e))
+            if (e) % 20 == 0:
+                CkptName = 'Rt' + '_' + str(e)
                 nsml.save(CkptName)
                 print('checkpoint name : ' + str(CkptName))
         elif Modelname == 'DenseNet169':
-            print('Model generated : ' + Modelname + "_" + str(e+1))
-            if (e + 1) % 10 == 0:
-                CkptName = Modelname + '_' + str(e+1)
+            print('Model generated : ' + Modelname + "_" + str(e))
+            if (e) % 20 == 0:
+                CkptName = 'Dt' + '_' + str(e)
                 nsml.save(CkptName)
                 print('checkpoint name : ' + str(CkptName))
         else:
@@ -267,7 +274,7 @@ if __name__ == '__main__':
     args.add_argument('--epoch', type=int, default=200)
     args.add_argument('--batch_size', type=int, default=64)
     args.add_argument('--num_classes', type=int, default=1383)
-    args.add_argument('--lr', type=float, default=0.001)
+    args.add_argument('--lr', type=float, default=0.0001)
 
     # DONOTCHANGE: They are reserved for nsml
     args.add_argument('--mode', type=str, default='train', help='submit일때 해당값이 test로 설정됩니다.')
@@ -285,13 +292,15 @@ if __name__ == '__main__':
     input_shape = (224, 224, 3)  # input image shape
     lr = config.lr
     st_epoch = config.iteration  # fork할 때, balancing count 받아오기 위해서 iteration = start epoch
+    mean = np.array([144.62598745, 132.1989693, 119.10957842], dtype=np.float32).reshape((1, 1, 3)) / 255.0
+    std = np.array([5.71350834, 7.67297079, 8.68071288], dtype=np.float32).reshape((1, 1, 3)) / 255.0
     ModelNames = ['InceptionV3', 'ResNet50', 'DenseNet169']
 
     """ Load Base Models and Setting Input Shape """
     # weights='imagenet'
-    base_model1 = InceptionV3(input_shape = input_shape, weights='imagenet', include_top=False, classes=1000) # base_model1 : <class 'keras.engine.training.Model'>
-    base_model2 = ResNet50(input_shape = input_shape, weights='imagenet', include_top=False, classes=1000)
-    base_model3 = DenseNet169(input_shape = input_shape, weights='imagenet', include_top=False, classes=1000)
+    base_model1 = InceptionV3(input_shape = input_shape, weights=None, include_top=False, classes=1000) # base_model1 : <class 'keras.engine.training.Model'>
+    base_model2 = ResNet50(input_shape = input_shape, weights=None, include_top=False, classes=1000)
+    base_model3 = DenseNet169(input_shape = input_shape, weights=None, include_top=False, classes=1000)
 
     model_input1 = Input(shape=base_model1.input_shape, name='image_input')
     model_input2 = Input(shape=base_model2.input_shape, name='image_input')
@@ -323,14 +332,14 @@ if __name__ == '__main__':
         FineTunedDenseNet169.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
 
         train_datagen = ImageDataGenerator(
-            # rescale=1. / 255,
-            # rotation_range=180,
-            # width_shift_range=0.2,
-            # height_shift_range=0.2,
-            # shear_range=0.2,
-            # zoom_range=0.2,
-            # horizontal_flip=True,
-            # vertical_flip=True,
+            rescale=1. / 255,
+            rotation_range=180,
+            width_shift_range=0.2,
+            height_shift_range=0.2,
+            shear_range=0.2,
+            zoom_range=0.2,
+            horizontal_flip=True,
+            vertical_flip=True,
             featurewise_center=True,
             featurewise_std_normalization=True
         )
