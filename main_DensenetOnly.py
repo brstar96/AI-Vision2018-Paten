@@ -30,8 +30,6 @@ from keras.preprocessing.image import ImageDataGenerator
 from data_loader import train_data_balancing
 
 # pretrained models from Keras
-# from keras.applications.inception_v3 import *
-# from keras.applications.resnet50 import *
 from keras.applications.densenet import *
 
 from keras.utils.training_utils import multi_gpu_model
@@ -151,14 +149,14 @@ def balancing_process(train_dataset_path,input_shape, fork_epoch ,nb_epoch):
 def AddFineTuningLayer(basemodel, model_input, modelname):
     # include_top = False이면 FCN같은 마지막 레이어 미포함
     # These classification layer structures are from Keras official github and paper
-    if modelname == 'InceptionV3':
+    if modelname == 'DenseNet121':
         basemodel.trainable = False
         x = basemodel.output
         # Classification block (codes from 'inception_v3.py' on keras official github)
         # avg_pool (GlobalAveragePooling2 (None, 2048) 0 activation_143[0][0]
         x = GlobalAveragePooling2D(name='avg_pool')(x)
         x = Dense(config.num_classes, activation='softmax', name='fc1383')(x)
-        model = Model(inputs = basemodel.input, outputs = x, name = 'InceptionV3')
+        model = Model(inputs = basemodel.input, outputs = x, name = 'DenseNet121')
         # model = Model(inputs=model_input, outputs=x, name='InceptionV3') # 위에 코드 안먹히면 이걸로 다시 테스트 해볼것.
         bind_model(model)
         for i in range(0, 3):
@@ -166,33 +164,26 @@ def AddFineTuningLayer(basemodel, model_input, modelname):
         print('=================== ' + modelname + ' has been successfully Modfied! ===================')
         model.summary()
         return model
-    elif modelname == 'ResNet50':
+    elif modelname == 'DenseNet169':
         basemodel.trainable = False
         x = basemodel.output
         # avg_pool (GlobalAveragePooling2 (None, 2048) 0 activation_143[0][0]
         x = GlobalAveragePooling2D(name='avg_pool')(x)
         x = Dense(config.num_classes, activation='softmax', name='fc1383')(x)
-        model = Model(inputs = basemodel.input, outputs = x, name = 'ResNet50')
+        model = Model(inputs = basemodel.input, outputs = x, name = 'DenseNet169')
         bind_model(model)
         for i in range(0, 3):
             print('')
         print('=================== ' + modelname + ' has been successfully Modfied! ===================')
         model.summary()
         return model
-    elif modelname == 'DenseNet121' and 'DenseNet169' and 'DenseNet201':
+    elif modelname == 'DenseNet201':
         basemodel.trainable = False
         x = basemodel.output
         # avg_pool (GlobalAveragePooling2 (None, 1920) 0 relu[0][0]
         x = GlobalAveragePooling2D(name='avg_pool')(x)  # same as ResNet50
         x = Dense(config.num_classes, activation='softmax', name='fc1383')(x)  # same as ResNet50
-        if modelname == 'DenseNet121':
-            model = Model(inputs = basemodel.input, outputs = x, name = 'DenseNet121')
-        elif modelname == 'DenseNet169':
-            model = Model(inputs=basemodel.input, outputs=x, name='DenseNet169')
-        elif modelname == 'DenseNet201':
-            model = Model(inputs=basemodel.input, outputs=x, name='DenseNet201')
-        else:
-            NotImplementedError
+        model = Model(inputs = basemodel.input, outputs = x, name = 'DenseNet201')
         bind_model(model)
         for i in range(0, 3):
             print('')
@@ -238,34 +229,34 @@ def model_Fit(model, Modelname):
         #val_loss, val_acc = res.history['val_loss'][0], res.history['val_acc'][0]
         nsml.report(summary=True, epoch=e, epoch_total=nb_epoch, loss=train_loss, acc=train_acc)#, val_loss=val_loss, val_acc=val_acc)
 
-        if Modelname == 'InceptionV3':
+        if Modelname == 'DenseNet121':
             print('Model generated : ' + Modelname + "_" + str(e))
             if (e) % 20 == 0:
-                CkptName = 'IpNet' + '_' + str(e)
+                CkptName = 'DtNet121' + '_' + str(e)
                 nsml.save(CkptName)
                 print('checkpoint name : ' + str(CkptName))
             if e > 60 and e < 100:
-                CkptName = 'tIpNet' + '_' + str(e)
+                CkptName = 'DtNet121' + '_' + str(e)
                 nsml.save(str(CkptName))
                 print('checkpoint name : ' + str(CkptName))
-        elif Modelname == 'ResNet50':
+        elif Modelname == 'DenseNet169':
             print('Model generated : ' + Modelname + "_" + str(e))
             if (e) % 20 == 0:
-                CkptName = 'RNNet' + '_' + str(e)
+                CkptName = 'DtNet169' + '_' + str(e)
                 nsml.save(CkptName)
                 print('checkpoint name : ' + str(CkptName))
             if e > 60 and e < 100:
-                CkptName = 'tRNNet' + '_' + str(e)
+                CkptName = 'DtNet169' + '_' + str(e)
                 nsml.save(str(CkptName))
                 print('checkpoint name : ' + str(CkptName))
-        elif Modelname == 'DenseNet121' and 'DenseNet169' and 'DenseNet201':
+        elif Modelname == 'DenseNet201':
             print('Model generated : ' + Modelname + "_" + str(e))
             if (e) % 20 == 0:
-                CkptName = 'DtNet' + '_' + str(e)
+                CkptName = 'DtNet201' + '_' + str(e)
                 nsml.save(CkptName)
                 print('checkpoint name : ' + str(CkptName))
             if e > 60 and e < 100:
-                CkptName = 'tDtNet' + '_' + str(e)
+                CkptName = 'DtNet201' + '_' + str(e)
                 nsml.save(str(CkptName))
                 print('checkpoint name : ' + str(CkptName))
         else:
@@ -278,7 +269,7 @@ def model_Fit(model, Modelname):
     print('Total training time : %.1f' % (time.time() - t0))
     return model, res
 
-if __name__ == '__main__':
+if __name__ == '__main_DensenetOnly__':
     args = argparse.ArgumentParser()
 
     # hyperparameters
@@ -307,7 +298,7 @@ if __name__ == '__main__':
     st_epoch = config.iteration  # fork할 때, balancing count 받아오기 위해서 iteration = start epoch
     mean = np.array([144.62598745, 132.1989693, 119.10957842], dtype=np.float32).reshape((1, 1, 3)) / 255.0
     std = np.array([5.71350834, 7.67297079, 8.68071288], dtype=np.float32).reshape((1, 1, 3)) / 255.0
-    ModelNames = ['InceptionV3', 'ResNet50', 'DenseNet121', 'DenseNet169', 'DenseNet201']
+    ModelNames = ['DenseNet121', 'DenseNet169', 'DenseNet201']
 
     """ Load Base Models and Setting Input Shape """
     # weights='imagenet'
@@ -320,9 +311,9 @@ if __name__ == '__main__':
     model_input3 = Input(shape=base_model3.input_shape, name='image_input')
 
     """ Add Finetuning Layers to pre-trained model and bind to NSML """
-    FineTunedDenseNet121 = AddFineTuningLayer(base_model1, model_input1, ModelNames[2]) # FineTunedInceptionV3 : <class 'keras.engine.training.Model'>
-    FineTunedDenseNet169 = AddFineTuningLayer(base_model2, model_input2, ModelNames[3])
-    FineTunedDenseNet201 = AddFineTuningLayer(base_model3, model_input3, ModelNames[4])
+    FineTunedDenseNet121 = AddFineTuningLayer(base_model1, model_input1, ModelNames[0]) # FineTunedInceptionV3 : <class 'keras.engine.training.Model'>
+    FineTunedDenseNet169 = AddFineTuningLayer(base_model2, model_input2, ModelNames[1])
+    FineTunedDenseNet201 = AddFineTuningLayer(base_model3, model_input3, ModelNames[2])
 
     if config.pause:
         nsml.paused(scope=locals())
@@ -340,7 +331,7 @@ if __name__ == '__main__':
             opt = keras.optimizers.SGD(lr=lr, momentum=0.9, nesterov=True, decay=1e-6)
 
         """ Compile 3 Models """
-        FineTunedDenseNet121.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
+        FineTunedDenseNet121.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy']) # <class 'keras.engine.training.Model'>
         FineTunedDenseNet169.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
         FineTunedDenseNet201.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
 
@@ -364,16 +355,15 @@ if __name__ == '__main__':
         reduce_lr = ReduceLROnPlateau(monitor=monitor, patience=3, verbose=1)
 
         """ Model Fit, Training Loop, Checkpoint save """
-        FineTunedDenseNet121 = model_Fit(FineTunedDenseNet121, ModelNames[2])
+        FineTunedDenseNet121 = model_Fit(FineTunedDenseNet121, ModelNames[0])
         del FineTunedDenseNet121
-        print(ModelNames[2] + ' has been deleted.')
-        FineTunedDenseNet169 = model_Fit(FineTunedDenseNet169, ModelNames[3])
+        print(ModelNames[0] + ' has been deleted.')
+        FineTunedDenseNet169 = model_Fit(FineTunedDenseNet169, ModelNames[1])
         del FineTunedDenseNet169
-        print(ModelNames[3] + ' has been deleted.')
-        FineTunedDenseNet201 = model_Fit(FineTunedDenseNet201, ModelNames[4])
+        print(ModelNames[1] + ' has been deleted.')
+        FineTunedDenseNet201 = model_Fit(FineTunedDenseNet201, ModelNames[2])
         del FineTunedDenseNet201
-        print(ModelNames[4] + ' has been deleted.')
-
+        print(ModelNames[2] + ' has been deleted.')
         # TrainedModels = [FineTunedInceptionV3[0], FineTunedResNet50[0], FineTunedDenseNet169[0]] # FineTunedInceptionV3[0] : <class 'keras.engine.training.Model'>
 
     # place ensemble functioncall here

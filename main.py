@@ -154,7 +154,7 @@ def AddFineTuningLayer(basemodel, model_input, modelname):
     # include_top = False이면 FCN같은 마지막 레이어 미포함
     # These classification layer structures are from Keras official github and paper
     if modelname == 'InceptionV3':
-        basemodel.trainable = False
+        # basemodel.trainable = False
         x = basemodel.output
         # Classification block (codes from 'inception_v3.py' on keras official github)
         # avg_pool (GlobalAveragePooling2 (None, 2048) 0 activation_143[0][0]
@@ -169,7 +169,7 @@ def AddFineTuningLayer(basemodel, model_input, modelname):
         model.summary()
         return model
     elif modelname == 'ResNet50':
-        basemodel.trainable = False
+        # basemodel.trainable = False
         x = basemodel.output
         # avg_pool (GlobalAveragePooling2 (None, 2048) 0 activation_143[0][0]
         x = GlobalAveragePooling2D(name='avg_pool')(x)
@@ -182,7 +182,7 @@ def AddFineTuningLayer(basemodel, model_input, modelname):
         model.summary()
         return model
     elif modelname == 'DenseNet169':
-        basemodel.trainable = False
+        # basemodel.trainable = False
         x = basemodel.output
         # avg_pool (GlobalAveragePooling2 (None, 1920) 0 relu[0][0]
         x = GlobalAveragePooling2D(name='avg_pool')(x)  # same as ResNet50
@@ -278,8 +278,8 @@ if __name__ == '__main__':
 
     # hyperparameters
     # epochs가 없으면 fork시 버그 걸려서 넣어둠
-    args.add_argument('--epochs', type=int, default=200)
-    args.add_argument('--epoch', type=int, default=200)
+    args.add_argument('--epochs', type=int, default=100)
+    args.add_argument('--epoch', type=int, default=100)
     args.add_argument('--batch_size', type=int, default=64)
     args.add_argument('--num_classes', type=int, default=1383)
     args.add_argument('--lr', type=float, default=0.0001)
@@ -306,9 +306,9 @@ if __name__ == '__main__':
 
     """ Load Base Models and Setting Input Shape """
     # weights='imagenet'
-    base_model1 = InceptionV3(input_shape = input_shape, weights=None, include_top=False, classes=1000) # base_model1 : <class 'keras.engine.training.Model'>
-    base_model2 = ResNet50(input_shape = input_shape, weights=None, include_top=False, classes=1000)
-    base_model3 = DenseNet169(input_shape = input_shape, weights=None, include_top=False, classes=1000)
+    base_model1 = InceptionV3(input_shape = input_shape, weights='imagenet', include_top=False, classes=1000) # base_model1 : <class 'keras.engine.training.Model'>
+    base_model2 = ResNet50(input_shape = input_shape, weights='imagenet', include_top=False, classes=1000)
+    base_model3 = DenseNet169(input_shape = input_shape, weights='imagenet', include_top=False, classes=1000)
 
     model_input1 = Input(shape=base_model1.input_shape, name='image_input')
     model_input2 = Input(shape=base_model2.input_shape, name='image_input')
