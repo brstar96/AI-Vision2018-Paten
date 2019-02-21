@@ -90,8 +90,10 @@ def bind_model(model):
     nsml.bind(save=save, load=load, infer=infer)
 
 def l2_normalize(v):
-    norm = np.linalg.norm(v, axis=1, keepdims=True)
-    return np.divide(v, norm, where=norm != 0)
+    norm = np.linalg.norm(v)
+    if norm == 0:
+        return v
+    return v / norm
 
 # data preprocess
 def get_feature(model, queries, db):
