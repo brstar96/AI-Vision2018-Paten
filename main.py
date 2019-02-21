@@ -1,4 +1,5 @@
 # Dummy session generation code for ensemble
+# This code is written for query expansion with ensemble.
 
 # -*- coding: utf_8 -*-
 from __future__ import absolute_import
@@ -23,7 +24,7 @@ from keras.preprocessing.image import ImageDataGenerator
 from keras.utils.training_utils import multi_gpu_model
 from keras.applications.nasnet import *
 from keras.applications.densenet import *
-from data_loader import train_data_loader,train_data_balancing, val_data_loader
+from data_loader import train_data_loader,train_data_balancing
 import gc
 #from DenseNet import densenet169
 
@@ -72,11 +73,9 @@ def bind_model(model):
     # DONOTCHANGE: They are reserved for nsml
     nsml.bind(save=save, load=load, infer=infer)
 
-
 def l2_normalize(v):
     norm = np.linalg.norm(v, axis=1, keepdims=True)
     return np.divide(v, norm, where=norm != 0)
-
 
 # data preprocess
 def get_feature(model1, model2, model3, queries, db):
@@ -162,8 +161,6 @@ def balancing_process(train_dataset_path,input_shape, fork_epoch,nb_epoch):
     return x_train, y_train
 
 
-
-
 if __name__ == '__main__':
     args = argparse.ArgumentParser()
 
@@ -214,6 +211,7 @@ if __name__ == '__main__':
     z = GlobalAveragePooling2D(name='avg_pool')(z)
     z = Dense(config.num_classes, activation='softmax', name='fc1383')(z)
     DenseNet201_SkeletonModel = Model(inputs=basemodel3.input, outputs=z, name='DenseNet201')
+
 
     if config.pause:
         nsml.paused(scope=locals())
