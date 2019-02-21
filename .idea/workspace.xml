@@ -2,73 +2,42 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="c416ff89-fa36-4a56-aca9-d1c0fa45cd82" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/misc.xml" afterPath="$PROJECT_DIR$/.idea/misc.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/team_33_ir_ph2_172.iml" afterPath="$PROJECT_DIR$/.idea/team_33_ir_ph2_172.iml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/data_loader.py" afterPath="$PROJECT_DIR$/data_loader.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/main.py" afterPath="$PROJECT_DIR$/main.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="FileEditorManager">
-    <splitter split-orientation="horizontal" split-proportion="0.5533981">
-      <split-first>
-        <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-          <file pinned="false" current-in-tab="true">
-            <entry file="file://$PROJECT_DIR$/main.py">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="320">
-                  <caret line="238" column="46" lean-forward="true" selection-start-line="238" selection-start-column="46" selection-end-line="238" selection-end-column="46" />
-                  <folding>
-                    <element signature="e#94#132#0" expanded="true" />
-                  </folding>
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file pinned="false" current-in-tab="false">
-            <entry file="file://C:/Python3_5/Lib/site-packages/keras/applications/densenet.py">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="300">
-                  <caret line="15" column="24" selection-start-line="15" selection-start-column="24" selection-end-line="15" selection-end-column="24" />
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file pinned="false" current-in-tab="false">
-            <entry file="file://C:/Python3_5/Lib/site-packages/keras_applications/densenet.py">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="8970">
-                  <caret line="308" column="6" selection-start-line="308" selection-start-column="6" selection-end-line="308" selection-end-column="6" />
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file pinned="false" current-in-tab="false">
-            <entry file="file://C:/Python3_5/Lib/site-packages/keras/preprocessing/image.py">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="3570">
-                  <caret line="127" column="27" selection-start-line="127" selection-start-column="17" selection-end-line="127" selection-end-column="27" />
-                </state>
-              </provider>
-            </entry>
-          </file>
-        </leaf>
-      </split-first>
-      <split-second>
-        <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-          <file pinned="false" current-in-tab="true">
-            <entry file="file://C:/Python3_5/Lib/site-packages/keras_applications/densenet.py">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="500">
-                  <caret line="217" column="41" lean-forward="true" selection-start-line="217" selection-start-column="41" selection-end-line="217" selection-end-column="41" />
-                </state>
-              </provider>
-            </entry>
-          </file>
-        </leaf>
-      </split-second>
-    </splitter>
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+      <file leaf-file-name="main.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/main.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="322">
+              <caret line="113" column="25" lean-forward="true" selection-start-line="113" selection-start-column="25" selection-end-line="113" selection-end-column="25" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="data_loader.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/data_loader.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="2691">
+              <caret line="125" column="19" lean-forward="false" selection-start-line="125" selection-start-column="19" selection-end-line="125" selection-end-column="19" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
@@ -111,18 +80,28 @@
     <option name="CHANGED_PATHS">
       <list>
         <option value="$PROJECT_DIR$/main.py" />
+        <option value="$PROJECT_DIR$/data_loader.py" />
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds" extendedState="1">
-    <option name="x" value="482" />
-    <option name="y" value="11" />
-    <option name="width" value="1610" />
-    <option name="height" value="1087" />
+  <component name="ProjectFrameBounds" extendedState="6">
+    <option name="x" value="-6" />
+    <option name="width" value="867" />
+    <option name="height" value="1000" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectView">
-    <navigator proportions="" version="1">
+    <navigator currentView="ProjectPane" proportions="" version="1">
+      <flattenPackages />
+      <showMembers />
+      <showModules />
+      <showLibraryContents />
+      <hideEmptyPackages />
+      <abbreviatePackageNames />
+      <autoscrollToSource />
+      <autoscrollFromSource />
+      <sortByType />
+      <manualOrder />
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
@@ -137,11 +116,12 @@
           <select />
         </subPane>
       </pane>
+      <pane id="Scratches" />
       <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../team_33_ir_ph2_567" />
+    <property name="last_opened_file_path" value="D:/team_33_ir_ph2_589" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
   <component name="RunDashboard">
@@ -155,6 +135,9 @@
         </RuleState>
       </list>
     </option>
+  </component>
+  <component name="ShelveChangesManager" show_recycled="false">
+    <option name="remove_strategy" value="false" />
   </component>
   <component name="SvnConfiguration">
     <configuration />
@@ -170,30 +153,45 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="482" y="11" width="1610" height="1087" extended-state="1" />
+    <frame x="-7" y="-7" width="1551" height="1008" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.12086514" />
-      <window_info id="Structure" order="1" weight="0.25" />
-      <window_info id="Favorites" order="2" side_tool="true" />
-      <window_info anchor="bottom" id="Message" order="0" />
-      <window_info anchor="bottom" id="Find" order="1" />
-      <window_info anchor="bottom" id="Run" order="2" />
-      <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
-      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
-      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
-      <window_info anchor="bottom" id="TODO" order="6" />
-      <window_info anchor="bottom" id="Version Control" order="7" />
-      <window_info anchor="bottom" id="Terminal" order="8" />
-      <window_info anchor="bottom" id="Event Log" order="9" side_tool="true" />
-      <window_info anchor="bottom" id="Python Console" order="10" />
-      <window_info anchor="right" id="Commander" order="0" weight="0.4" />
-      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
-      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
-      <window_info anchor="right" id="Data View" order="3" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.14397395" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="true" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="true" content_ui="tabs" />
+      <window_info id="Data View" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
     </layout>
   </component>
+  <component name="VcsContentAnnotationSettings">
+    <option name="myLimit" value="2678400000" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager />
+    <watches-manager />
+  </component>
   <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/main.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://C:/Python352/Lib/site-packages/keras/applications/vgg16.py" />
     <entry file="file://C:/Python3_5/Lib/site-packages/keras/applications/resnet50.py" />
     <entry file="file://C:/Python3_5/Lib/site-packages/keras_applications/resnet50.py" />
@@ -202,96 +200,32 @@
     <entry file="file://C:/Python352/Lib/site-packages/keras/layers/merge.py" />
     <entry file="file://C:/Python352/Lib/site-packages/keras/engine/training.py" />
     <entry file="file://$PROJECT_DIR$/DenseNet/test_inference.py" />
-    <entry file="file://C:/Python3_5/Lib/site-packages/keras/applications/inception_v3.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="150">
-          <caret line="10" column="16" selection-start-line="10" selection-start-column="16" selection-end-line="10" selection-end-column="16" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/data_loader.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="90">
-          <caret line="9" column="10" selection-start-line="9" selection-start-column="10" selection-end-line="9" selection-end-column="10" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://C:/Python3_5/Lib/site-packages/keras_applications/inception_v3.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1823">
-          <caret line="113" column="42" selection-start-line="113" selection-start-column="36" selection-end-line="113" selection-end-column="42" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://C:/Python3_5/Lib/site-packages/keras/backend/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="300">
-          <caret line="10" column="34" selection-start-line="10" selection-start-column="34" selection-end-line="10" selection-end-column="34" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://C:/Python3_5/Lib/site-packages/keras/utils/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="420">
-          <caret line="14" column="44" selection-start-line="14" selection-start-column="44" selection-end-line="14" selection-end-column="44" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://C:/Python3_5/Lib/site-packages/keras/applications/inception_v3.py" />
+    <entry file="file://C:/Python3_5/Lib/site-packages/keras_applications/inception_v3.py" />
+    <entry file="file://C:/Python3_5/Lib/site-packages/keras/backend/__init__.py" />
+    <entry file="file://C:/Python3_5/Lib/site-packages/keras/utils/__init__.py" />
     <entry file="file://$PROJECT_DIR$/utils/__init__.py" />
-    <entry file="file://C:/Python3_5/Lib/site-packages/keras/preprocessing/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="150">
-          <caret line="5" column="19" selection-start-line="5" selection-start-column="19" selection-end-line="5" selection-end-column="19" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://C:/Python3_5/Lib/site-packages/keras/preprocessing/__init__.py" />
     <entry file="file://$PROJECT_DIR$/preprocessing/image.py" />
     <entry file="file://$PROJECT_DIR$/preprocessing/__init__.py" />
-    <entry file="file://C:/Python3_5/Lib/argparse.py">
+    <entry file="file://C:/Python3_5/Lib/argparse.py" />
+    <entry file="file://C:/Python3_5/Lib/site-packages/keras_preprocessing/image.py" />
+    <entry file="file://C:/Python3_5/Lib/site-packages/keras/applications/densenet.py" />
+    <entry file="file://C:/Python3_5/Lib/site-packages/keras/preprocessing/image.py" />
+    <entry file="file://C:/Python3_5/Lib/site-packages/keras_applications/densenet.py" />
+    <entry file="file://$PROJECT_DIR$/data_loader.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="309">
-          <caret line="1724" column="8" selection-start-line="1724" selection-start-column="8" selection-end-line="1724" selection-end-column="18" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://C:/Python3_5/Lib/site-packages/keras_preprocessing/image.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="391">
-          <caret line="820" column="13" selection-start-line="820" selection-start-column="13" selection-end-line="820" selection-end-column="13" />
-          <folding>
-            <element signature="e#64#102#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://C:/Python3_5/Lib/site-packages/keras/applications/densenet.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="300">
-          <caret line="15" column="24" selection-start-line="15" selection-start-column="24" selection-end-line="15" selection-end-column="24" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://C:/Python3_5/Lib/site-packages/keras/preprocessing/image.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3570">
-          <caret line="127" column="27" selection-start-line="127" selection-start-column="17" selection-end-line="127" selection-end-column="27" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://C:/Python3_5/Lib/site-packages/keras_applications/densenet.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="8970">
-          <caret line="308" column="6" selection-start-line="308" selection-start-column="6" selection-end-line="308" selection-end-column="6" />
+        <state relative-caret-position="2691">
+          <caret line="125" column="19" lean-forward="false" selection-start-line="125" selection-start-column="19" selection-end-line="125" selection-end-column="19" />
+          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/main.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="320">
-          <caret line="238" column="46" lean-forward="true" selection-start-line="238" selection-start-column="46" selection-end-line="238" selection-end-column="46" />
-          <folding>
-            <element signature="e#94#132#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="322">
+          <caret line="113" column="25" lean-forward="true" selection-start-line="113" selection-start-column="25" selection-end-line="113" selection-end-column="25" />
+          <folding />
         </state>
       </provider>
     </entry>
