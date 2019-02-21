@@ -326,7 +326,6 @@ if __name__ == '__main__':
     if config.mode == 'train':
         bTrainmode = True
 
-        #nsml.load(checkpoint=151, session='team_33/ir_ph2/141')           # load시 수정 필수!
 
         """ Initiate RMSprop optimizer """
         if (opt == 'rmsprop'):
