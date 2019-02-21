@@ -1,4 +1,5 @@
 # -*- coding: utf_8 -*-
+# -*- coding: utf_8 -*-
 # CNN + XGBoost + Softmax 구현을 위한 baselinecode (AvgEnsemble코드에서 fork)
 
 from __future__ import absolute_import

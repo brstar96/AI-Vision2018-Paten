@@ -305,19 +305,11 @@ if __name__ == '__main__':
     ModelNames = ['InceptionV3', 'ResNet50', 'DenseNet169']
 
     """ Load Base Models and Setting Input Shape """
-    # weights='imagenet'
-    base_model1 = InceptionV3(input_shape = input_shape, weights='imagenet', include_top=False, classes=1000) # base_model1 : <class 'keras.engine.training.Model'>
-    base_model2 = ResNet50(input_shape = input_shape, weights='imagenet', include_top=False, classes=1000)
-    base_model3 = DenseNet169(input_shape = input_shape, weights='imagenet', include_top=False, classes=1000)
+    basemodel1 = nsml.load(checkpoint=151, session='team_33/ir_ph2/141')  # loading trained densenet121
+    basemodel2 = nsml.load(checkpoint=151, session='team_33/ir_ph2/141')  # loading trained densenet169
+    basemodel3 = nsml.load(checkpoint=151, session='team_33/ir_ph2/141')  # loading trained densenet201
 
-    model_input1 = Input(shape=base_model1.input_shape, name='image_input')
-    model_input2 = Input(shape=base_model2.input_shape, name='image_input')
-    model_input3 = Input(shape=base_model3.input_shape, name='image_input')
 
-    """ Add Finetuning Layers to pre-trained model and bind to NSML """
-    FineTunedInceptionV3 = AddFineTuningLayer(base_model1, model_input1, ModelNames[0]) # FineTunedInceptionV3 : <class 'keras.engine.training.Model'>
-    FineTunedResNet50 = AddFineTuningLayer(base_model2, model_input2, ModelNames[1])
-    FineTunedDenseNet169 = AddFineTuningLayer(base_model3, model_input3, ModelNames[2])
 
     if config.pause:
         nsml.paused(scope=locals())
