@@ -17,7 +17,7 @@ from nsml import DATASET_PATH
 import keras
 from keras import layers
 from keras.models import Sequential, Model
-from keras.layers import Dense, Dropout, Flatten, Activation
+from keras.layers import Dense, Dropout, Flatten, Activation, Average
 from keras.layers import Conv2D, MaxPooling2D, GlobalAveragePooling2D
 from keras.callbacks import ReduceLROnPlateau
 from keras.preprocessing.image import ImageDataGenerator
@@ -27,6 +27,27 @@ from keras.applications.densenet import *
 from data_loader import train_data_loader,train_data_balancing
 import gc
 #from DenseNet import densenet169
+
+num_classes = 1383
+input_shape = (224, 224, 3)  # input image shape
+
+basemodel1 = DenseNet201(input_shape=input_shape, weights=None, include_top=False, classes=1000)
+x = basemodel1.output
+x = GlobalAveragePooling2D(name='avg_pool')(x)
+x = Dense(num_classes, activation='softmax', name='fc1383')(x)
+DenseNet201_SkeletonModel_1 = Model(inputs=basemodel1.input, outputs=x, name='DtNet201_40')
+
+basemodel2 = DenseNet201(input_shape=input_shape, weights=None, include_top=False, classes=1000)
+y = basemodel2.output
+y = GlobalAveragePooling2D(name='avg_pool')(y)
+y = Dense(num_classes, activation='softmax', name='fc1383')(y)
+DenseNet201_SkeletonModel_2 = Model(inputs=basemodel2.input, outputs=y, name='DtNet201_60')
+
+basemodel3 = DenseNet201(input_shape=input_shape, weights=None, include_top=False, classes=1000)
+z = basemodel3.output
+z = GlobalAveragePooling2D(name='avg_pool')(z)
+z = Dense(num_classes, activation='softmax', name='fc1383')(z)
+DenseNet201_SkeletonModel_3 = Model(inputs=basemodel3.input, outputs=z, name='DenseNet201_70')
 
 def bind_model(model):
     def save(dir_name):
@@ -86,9 +107,9 @@ def get_feature(model1, model2, model3, queries, db):
     std = np.array([5.71350834, 7.67297079, 8.68071288], dtype=np.float32).reshape((1, 1, 3)) / 255.0
 
     # Create Intermeriate Layer model for Inference
-    intermediate_layer_model_from_DenseNet121 = Model(inputs=model1.layers[0].input, outputs=model1.layers[-1].output)
-    intermediate_layer_model_from_DenseNet169 = Model(inputs=model2.layers[0].input, outputs=model2.layers[-1].output)
-    intermediate_layer_model_from_DenseNet201 = Model(inputs=model3.layers[0].input, outputs=model3.layers[-1].output)
+    intermediate_layer_model_from_DenseNet201_40 = Model(inputs=model1.layers[0].input, outputs=model1.layers[-1].output)
+    intermediate_layer_model_from_DenseNet201_60 = Model(inputs=model2.layers[0].input, outputs=model2.layers[-1].output)
+    intermediate_layer_model_from_DenseNet201_70 = Model(inputs=model3.layers[0].input, outputs=model3.layers[-1].output)
 
     test_datagen = ImageDataGenerator(rescale=1. / 255, dtype='float32',
                                       rotation_range=180,
@@ -111,15 +132,15 @@ def get_feature(model1, model2, model3, queries, db):
     test_datagen.mean = mean
     test_datagen.std = std
 
-    query_vecs_from_DenseNet121 = intermediate_layer_model_from_DenseNet121.predict_generator(query_generator, steps=len(query_generator), verbose=1)
-    query_vecs_from_DenseNet169 = intermediate_layer_model_from_DenseNet169.predict_generator(query_generator, steps=len(query_generator), verbose=1)
-    query_vecs_from_DenseNet201 = intermediate_layer_model_from_DenseNet201.predict_generator(query_generator, steps=len(query_generator), verbose=1)
+    query_vecs_from_DenseNet201_40 = intermediate_layer_model_from_DenseNet201_40.predict_generator(query_generator, steps=len(query_generator), verbose=1)
+    query_vecs_from_DenseNet201_60 = intermediate_layer_model_from_DenseNet201_60.predict_generator(query_generator, steps=len(query_generator), verbose=1)
+    query_vecs_from_DenseNet201_70 = intermediate_layer_model_from_DenseNet201_70.predict_generator(query_generator, steps=len(query_generator), verbose=1)
 
     query_vecs_from_DenseNets = []
-    query_vecs_from_DenseNets.append(query_vecs_from_DenseNet121)
-    query_vecs_from_DenseNets.append(query_vecs_from_DenseNet169)
-    query_vecs_from_DenseNets.append(query_vecs_from_DenseNet201)
-    joinedQueryvecs = keras.layers.concatenate(query_vecs_from_DenseNets, axis=1)
+    query_vecs_from_DenseNets.append(query_vecs_from_DenseNet201_40)
+    query_vecs_from_DenseNets.append(query_vecs_from_DenseNet201_60)
+    query_vecs_from_DenseNets.append(query_vecs_from_DenseNet201_70)
+    AveragedQueryVecs = Average()(query_vecs_from_DenseNets)
 
 
     reference_generator = test_datagen.flow_from_directory(
@@ -135,17 +156,17 @@ def get_feature(model1, model2, model3, queries, db):
     test_datagen.mean = mean
     test_datagen.std = std
 
-    reference_vecs_from_DenseNet121 = intermediate_layer_model_from_DenseNet121.predict_generator(reference_generator, steps=len(reference_generator), verbose=1)
-    reference_vecs_from_DenseNet169 = intermediate_layer_model_from_DenseNet169.predict_generator(reference_generator, steps=len(reference_generator), verbose=1)
-    reference_vecs_from_DenseNet201 = intermediate_layer_model_from_DenseNet201.predict_generator(reference_generator, steps=len(reference_generator), verbose=1)
+    reference_vecs_from_DenseNet201_40 = intermediate_layer_model_from_DenseNet201_40.predict_generator(reference_generator, steps=len(reference_generator), verbose=1)
+    reference_vecs_from_DenseNet201_60 = intermediate_layer_model_from_DenseNet201_60.predict_generator(reference_generator, steps=len(reference_generator), verbose=1)
+    reference_vecs_from_DenseNet201_70 = intermediate_layer_model_from_DenseNet201_70.predict_generator(reference_generator, steps=len(reference_generator), verbose=1)
 
     ref_vecs_from_DenseNets = []
-    ref_vecs_from_DenseNets.append(reference_vecs_from_DenseNet121)
-    ref_vecs_from_DenseNets.append(reference_vecs_from_DenseNet169)
-    ref_vecs_from_DenseNets.append(reference_vecs_from_DenseNet201)
-    joinedRefvecs = keras.layers.concatenate(ref_vecs_from_DenseNets, axis=1)
+    ref_vecs_from_DenseNets.append(reference_vecs_from_DenseNet201_40)
+    ref_vecs_from_DenseNets.append(reference_vecs_from_DenseNet201_60)
+    ref_vecs_from_DenseNets.append(reference_vecs_from_DenseNet201_70)
+    AveragedRefVecs = Average()(ref_vecs_from_DenseNets)
 
-    return queries, joinedQueryvecs, db, joinedRefvecs
+    return queries, AveragedQueryVecs, db, AveragedRefVecs
 
 def balancing_process(train_dataset_path,input_shape, fork_epoch,nb_epoch):
     img_list = []
@@ -181,38 +202,6 @@ if __name__ == '__main__':
     args.add_argument('--gpus', type=int, default=1)
     config = args.parse_args()
 
-    # training parameters
-    opt = config.opt
-    nb_epoch = config.epoch
-    batch_size = config.batch_size
-    num_classes = config.num_classes
-    input_shape = (224, 224, 3)  # input image shape
-    lr = config.lr
-    dropout = config.dropout
-    st_epoch = config.balepoch  # fork할 때, balancing count 받아오기 위해서 iteration = start epoch
-    gpus = config.gpus
-    mean = np.array([144.62598745, 132.1989693, 119.10957842], dtype=np.float32).reshape((1, 1, 3)) / 255.0
-    std = np.array([5.71350834, 7.67297079, 8.68071288], dtype=np.float32).reshape((1, 1, 3)) / 255.0
-
-    basemodel1 = DenseNet121(input_shape=input_shape, weights='imagenet', include_top=False, classes=1000) # load할 model의 빈 아키텍처 생성
-    x = basemodel1.output
-    x = GlobalAveragePooling2D(name='avg_pool')(x)
-    x = Dense(config.num_classes, activation='softmax', name='fc1383')(x)
-    DenseNet121_SkeletonModel = Model(inputs=basemodel1.input, outputs=x, name='DenseNet121')
-
-    basemodel2 = DenseNet169(input_shape=input_shape, weights='imagenet', include_top=False, classes=1000)
-    y = basemodel2.output
-    y = GlobalAveragePooling2D(name='avg_pool')(y)
-    y = Dense(config.num_classes, activation='softmax', name='fc1383')(y)
-    DenseNet169_SkeletonModel = Model(inputs=basemodel2.input, outputs=y, name='DenseNet169')
-
-    basemodel3 = DenseNet201(input_shape=input_shape, weights='imagenet', include_top=False, classes=1000)
-    z = basemodel3.output
-    z = GlobalAveragePooling2D(name='avg_pool')(z)
-    z = Dense(config.num_classes, activation='softmax', name='fc1383')(z)
-    DenseNet201_SkeletonModel = Model(inputs=basemodel3.input, outputs=z, name='DenseNet201')
-
-
     if config.pause:
         nsml.paused(scope=locals())
 
@@ -221,13 +210,13 @@ if __name__ == '__main__':
         bTrainmode = True
 
         """ Load Trained models """
-        bind_model(model=DenseNet121_SkeletonModel)  # weight가 로드된 모델이 생성됨.
-        nsml.load(checkpoint = 'DtNet121_80', session='team_33/ir_ph2/607')  # loading trained densenet121
+        bind_model(model=DenseNet201_SkeletonModel_1)  # weight가 로드된 모델이 생성됨.
+        nsml.load(checkpoint = 'DtNet201_40', session='team_33/ir_ph2/607')  # loading trained densenet169
         nsml.save('save1')
-        bind_model(model=DenseNet169_SkeletonModel)  # weight가 로드된 모델이 생성됨.
-        nsml.load(checkpoint = '568_0', session='team_33/ir_ph2/589')  # loading trained densenet169
+        bind_model(model=DenseNet201_SkeletonModel_2)  # weight가 로드된 모델이 생성됨.
+        nsml.load(checkpoint = 'DtNet201_60', session='team_33/ir_ph2/607')  # loading trained densenet201
         nsml.save('save2')
-        bind_model(model=DenseNet201_SkeletonModel)  # weight가 로드된 모델이 생성됨.
-        nsml.load(checkpoint = 'DtNet201_80', session='team_33/ir_ph2/607')  # loading trained densenet201
+        bind_model(model=DenseNet201_SkeletonModel_2)  # weight가 로드된 모델이 생성됨.
+        nsml.load(checkpoint='DtNet201_70', session='team_33/ir_ph2/607')  # loading trained densenet201
         nsml.save('save3')
         exit()
