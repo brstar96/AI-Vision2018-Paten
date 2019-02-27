@@ -1,5 +1,5 @@
 # -*- coding: utf_8 -*-
-# CNN + XGBoost + Softmax 구현을 위한 baselinecode (AvgEnsemble코드에서 fork)
+# 3개의 Densenet 모델을 한 세션에서 순차적으로 학습시키기 위한 코드입니다.
 
 from __future__ import absolute_import
 from __future__ import division

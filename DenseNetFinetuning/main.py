@@ -1,4 +1,6 @@
 # -*- coding: utf_8 -*-
+# 1000클래스 Imagenet으로 프리트레인된 DenseNet169를 파인튜닝하는 코드입니다.
+
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function

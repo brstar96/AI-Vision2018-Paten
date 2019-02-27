@@ -1,6 +1,11 @@
 # Dummy session generation code for ensemble
 # This code is written for query expansion with ensemble.
 
+# 1. 1000클래스 Imagenet으로 프리트레인된 DenseNet201 40, 60, 70 Epoch 모델 3개를 nsml.load로 로드합니다.
+# 2. 모델 로딩 후 마지막 feature 레이어 3개를 concat합니다.
+# 3. 새로운 모델을 nsml.bind로 바인드하고 Data augmentation 과정을 거친 후 Query expansion을 수행합니다.
+# 4. 쿼리 이미지와 레퍼런스 이미지 간의 코싸인 유사도를 비교합니다.
+
 # -*- coding: utf_8 -*-
 from __future__ import absolute_import
 from __future__ import division

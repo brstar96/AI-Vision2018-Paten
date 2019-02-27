@@ -1,3 +1,5 @@
+# NSML Log로부터 불필요한 문자를 제거한 후 정제된 RGB 코드로부터 원본 이미지를 재생성하는 코드입니다. 
+
 import cv2
 import numpy as np
 import os
